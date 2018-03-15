@@ -1,2 +1,2 @@
-# mist
-Repo for Project Mist - IoT Products at Aruba
+# Neutrino
+Repo for Project Neutrino - IoT Products at Aruba

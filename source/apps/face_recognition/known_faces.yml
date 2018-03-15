@@ -1,0 +1,83 @@
+defaults:
+    face_pic_path: /home/ggopalan/projects/face_recognition/aruba_known
+    known_faces_pkl_save: /home/ggopalan/projects/face_recognition/aruba_known.pkl
+    # In theory, save and load should be the same file. But splitting it
+    # here in case something in-between needs to be done (like versioning)
+    known_faces_pkl_load: /home/ggopalan/projects/face_recognition/aruba_known.pkl
+
+faces:
+    - giri:
+        full_name: Giri Gopalan
+        greeting_name: Gary
+        greeting: Hi Gary!
+        face_pic_name: Giri.jpg
+    - keerthi:
+        full_name: Keerthi Melkote
+        greeting_name: Keerthi
+        greeting: Hello Keerthi
+        face_pic_name: Keerthi.jpg
+    - partha:
+        full_name: Partha Narasimhan
+        greeting_name: Partha
+        greeting: Hello Partha
+        face_pic_name: Partha.jpg
+    - prasad:
+        full_name: Prasad Palkar
+        greeting_name: Prasad
+        greeting: Hello Prasad
+        face_pic_name: PrasadPalkar.jpg
+    - suhas:
+        full_name: Suhas Shetty
+        greeting_name: Suhas
+        greeting: Hello Suhas
+        face_pic_name: SuhasShetty.jpg
+    - steve:
+        full_name: Steve Alexander
+        greeting_name: Steve
+        greeting: Hello Steve
+        face_pic_name: SteveAlexander.jpg
+    - martin:
+        full_name: Martin Lord
+        greeting_name: Martin
+        greeting: Hello Martin
+        face_pic_name: MartinLord.jpg
+    - jisheng:
+        full_name: Jisheng Wang
+        greeting_name: Jisheng
+        greeting: Hello Jisheng
+        face_pic_name: JishengWang.jpg
+    - shirley:
+        full_name: Shirley Wu
+        greeting_name: Shirley
+        greeting: Hello Shirley
+        face_pic_name: ShirleyWu.jpg
+    - minyi:
+        full_name: Minyi Shen
+        greeting_name: Minyi
+        greeting: Hello Minyi
+        face_pic_name: MinyiShen.jpg
+    - shankar:
+        full_name: Shankar Subramanian
+        greeting_name: Shankar
+        greeting: Hello Shankar
+        face_pic_name: ShankarSubramanian.jpg
+    - brijesh:
+        full_name: Brijesh Nambiar
+        greeting_name: Brijesh
+        greeting: Hello Brijesh
+        face_pic_name: BrijeshNambiar.jpg
+    - manish:
+        full_name: Manish Tiwari
+        greeting_name: Manish
+        greeting: Hello Manish
+        face_pic_name: ManishTiwari.jpg
+    - mike:
+        full_name: Michael Tenefoss
+        greeting_name: Mike
+        greeting: Hello Mike
+        face_pic_name: MichaelTenefoss.jpg
+    - sriram:
+        full_name: Sriram Ramachandran
+        greeting_name: Sriram
+        greeting: Hello Sriram
+        face_pic_name: SriramRamachandran.jpg

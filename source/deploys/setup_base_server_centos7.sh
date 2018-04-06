@@ -65,6 +65,15 @@ function make_venv {
     python3.6 -m venv /opt/$PRODUCT_CODE_NAME/venvs/$NPY3_VENV_NAME
 }
 
+function install_start_docker {
+    echo "$(tput setaf 2) Install and start docker $(tput sgr 0)"
+    yum -y install docker   # maybe good idea to install a particular version
+    # Enable docker to start on reboot
+    systemctl enable docker.service
+    # Start docker
+    systemctl start docker
+}
+
 function set_bash_aliases {
 echo "$(tput setaf 2) Setup bash aliases, including activation of venv $(tput sgr 0)"
 # Create .bash_aliases file if it does not exist
@@ -86,6 +95,7 @@ install_dev_tools
 install_python3
 install_pip3
 make_venv
+install_start_docker      # Note: This has not been tested extensively
 set_bash_aliases
 
 echo "$(tput setaf 2) Please start a new bash shell or run 'source ~/.bashrc' to complete setup $(tput sgr 0)"

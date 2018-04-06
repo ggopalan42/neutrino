@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
 # This script is used to setup a neturino base server. This is the server
 # that will run all the application and infra dockers.
@@ -9,10 +9,10 @@
 #    2) Creates a python3 env called: npy3
 #    3) Sets up docker (engine, client, etc.)
 
-set -e
-
 PRODUCT_CODE_NAME=neutrino
 NPY3_VENV_NAME=npy3
+
+set -e
 
 function yum_update {
     # Start by making sure your system is up-to-date:
@@ -58,13 +58,27 @@ function install_pip3 {
 }
 
 function make_venv {
-    echo "$(tput setaf 2) Settingup venv npy3 $(tput sgr 0)"
+    echo "$(tput setaf 2) Setting up venv npy3 $(tput sgr 0)"
     # make directory for virtual env
     mkdir -p /opt/$PRODUCT_CODE_NAME/venvs/
     # Make the virtualenv npy3 and install python
     python3.6 -m venv /opt/$PRODUCT_CODE_NAME/venvs/$NPY3_VENV_NAME
 }
 
+function set_bash_aliases {
+echo "$(tput setaf 2) Setup bash aliases, including activation of venv $(tput sgr 0)"
+# Create .bash_aliases file if it does not exist
+# if [[ ! -e $HOME/.bash_aliases ]]; then
+#  touch $HOME/.bash_aliases
+# fi
+# Add needed aliases to bashrc file and source it
+cat <<EOT >> .bashrc
+
+alias src='source /home/ggopalan/.bashrc'
+alias tailf='tail -f'
+alias npy3='source /opt/neutrino/venvs/npy3/bin/activate'
+EOT
+}
 
 # Run all of the steps
 yum_update
@@ -72,4 +86,6 @@ install_dev_tools
 install_python3
 install_pip3
 make_venv
+set_bash_aliases
 
+echo "$(tput setaf 2) Please start a new bash shell or run 'source ~/.bashrc' to complete setup $(tput sgr 0)"

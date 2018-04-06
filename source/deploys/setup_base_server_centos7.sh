@@ -11,6 +11,9 @@
 
 set -e
 
+PRODUCT_CODE_NAME=neutrino
+NPY3_VENV_NAME=npy3
+
 function yum_update {
     # Start by making sure your system is up-to-date:
     # Note: Need to be careful about this. 
@@ -56,9 +59,12 @@ function install_pip3 {
 
 function make_venv {
     echo "$(tput setaf 2) Settingup venv npy3 $(tput sgr 0)"
+    # make directory for virtual env
+    mkdir -p /opt/$PRODUCT_CODE_NAME/venvs/
     # Make the virtualenv npy3 and install python
-    python3.6 -m venv npy3
+    python3.6 -m venv /opt/$PRODUCT_CODE_NAME/venvs/$NPY3_VENV_NAME
 }
+
 
 # Run all of the steps
 yum_update

@@ -1,0 +1,14 @@
+defaults:
+    creds:
+        user: root
+        pw: root
+        enc_type: None
+
+cams:
+    - slr01_bldg_d_f1_elevators:
+        display_name: Aruba SLR01 Bldg D Floor 1 Elevators
+        description: "Aruba, Sanat Clara Campus, Main Building, Floor 1, Elevators"
+        cam_type: axis_vapix_P3364
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 1      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f1_elevators 

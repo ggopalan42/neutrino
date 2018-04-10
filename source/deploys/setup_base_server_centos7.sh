@@ -65,6 +65,13 @@ function make_venv {
     python3.6 -m venv /opt/$PRODUCT_CODE_NAME/venvs/$NPY3_VENV_NAME
 }
 
+function install_python_packages {
+    echo "$(tput setaf 2) Installing python packages in $NPY3_VENV_NAME $(tput sgr 0)"
+    # Switch to the appropriate env
+    source /opt/neutrino/venvs/$NPY3_VENV_NAME/bin/activate
+    pip install -r requirements_centos7.txt 
+}
+
 function install_start_docker {
     echo "$(tput setaf 2) Install and start docker $(tput sgr 0)"
     yum -y install docker   # maybe good idea to install a particular version
@@ -95,6 +102,7 @@ install_dev_tools
 install_python3
 install_pip3
 make_venv
+install_python_packages
 install_start_docker      # Note: This has not been tested extensively
 set_bash_aliases
 

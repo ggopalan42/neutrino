@@ -1,0 +1,6 @@
+pc_params:     # These are the parameters for people counter app
+    confidence: 0.2   # The confidence level above which objects are identified
+
+kafka:
+    kafka_broker_hostname: '10.2.13.29'
+    kafka_broker_port: '9092'

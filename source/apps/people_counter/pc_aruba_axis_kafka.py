@@ -2,6 +2,7 @@
 ''' Given an URL, keep getting image from it, detect if there are any person(s)
     in the image and feed the results to kafka '''
 
+# Python lib imports
 import argparse
 import glob
 import cv2
@@ -9,25 +10,36 @@ import os
 import sys
 import json
 import time
+import yaml
 import urllib.request
-import count_people_fom_image as cp
 import numpy as np
 
 from kafka import KafkaProducer
 from urllib.parse import urlparse
 
-KAFKA_BROKER = '10.2.13.29'
-KAFKA_PORT = '9092'
-KAFKA_TOPIC = 'peoplecounter1'
+# Local imports
+import count_people_fom_image as cp
+import pc_utils
 
-class people_count_url():
+
+# Constamts
+
+# Config files (probably a good idea to move all config files to a single dir)
+CAM_CONFIG_YAML_FILE = './pc_aruba_slr01_cams.yml'
+PC_CONFIG_YAML_FILE = './pc_config.yml'
+
+# KAFKA_BROKER = '10.2.13.29'
+# KAFKA_PORT = '9092'
+# KAFKA_TOPIC = 'peoplecounter1'
+
+class people_count():
     def __init__(self, args):
-        self.url = args['url']
-        self.username = args['username']
-        self.password = args['password']
+        # Load all configs
+        self.args = args
+        self._load_pc_configs(args)
+        
         self.auth_done = False    # Auth needs to be done only once
-        self.confidence = args['confidence']
-        self.stream_name = args['name']
+        #### All of this below should go into config files ###
         # previous_det is a stupid hack. See explanation below
         self.previous_det = np.array([[[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]]])
         # Currently using the Mobilenet SSD models. Later make this
@@ -40,11 +52,26 @@ class people_count_url():
                 "sofa", "train", "tvmonitor"]
         self.person_idx = self.classes.index('person')
         self.colors = np.random.uniform(0, 255, size=(len(self.classes), 3)) 
-        self.producer=KafkaProducer(bootstrap_servers=
-                                   '{}:{}'.format(KAFKA_BROKER, KAFKA_PORT))
+        self.producer=KafkaProducer(bootstrap_servers= '{}:{}'.format(
+                                    self.pc_config.kafka_broker_hostname, 
+                                    self.pc_config.kafka_port))
         # Again, specifying format ver below here is non ideal
         self.msg_format_ver = '1.0.0'
 
+    def _load_pc_configs(self, args):
+        ''' Load all needed configs '''
+        pc_yaml_fn = args['pc_config']
+        cam_yaml_fn = args['cam_config']
+
+        # Set people counter config
+        with open(pc_yaml_fn) as pcfh:
+            pc_config_dict = yaml.load(pcfh)
+        self.pc_config = pc_utils.pc_config(pc_config_dict)
+
+        # Set camera config
+        with open(cam_yaml_fn) as cfh:
+            cam_config_dict = yaml.load(cfh)
+        self.cams_config = pc_utils.all_cams_config(cam_config_dict)
 
     def set_model(self, model_net):
          self.net = model_net
@@ -66,16 +93,10 @@ def parse_args():
     ''' Parse the arguments and return a dict '''
     # construct the argument parse and parse the arguments
     ap = argparse.ArgumentParser()
-    ap.add_argument("-u", "--url", required=True,
-            help="URL to image")
-    ap.add_argument("--username", required=False, default=None,
-            help="Username - needed if URL needs to be authenticated")
-    ap.add_argument("--password", required=False, default=None,
-            help="Password - needed if URL needs to be authenticated")
-    ap.add_argument("-n", "--name", required=True,
-            help="Name for this kafka stream")
-    ap.add_argument("-c", "--confidence", type=float, default=0.2,
-            help="minimum probability to filter weak detections")
+    ap.add_argument("-p", "--pc_config", default=PC_CONFIG_YAML_FILE,
+            help="people Counter config YAML file")
+    ap.add_argument("-c", "--cam_config", default=CAM_CONFIG_YAML_FILE,
+            help="Camera config YAML file")
     args = vars(ap.parse_args())
     return args
 
@@ -164,7 +185,9 @@ def main_loop(pcu):
 
 if __name__ == '__main__':
     # Initialize
-    pcu = people_count_url(parse_args())
+    pcu = people_count(parse_args())
+    print(pcu.pc_config.confidence)
+    sys.exit()
     # Connect to camera
     pcu.connect_to_cam()
     # load our serialized model from disk

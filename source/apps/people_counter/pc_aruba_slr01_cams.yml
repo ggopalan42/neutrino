@@ -1,14 +1,37 @@
 defaults:
     creds:
-        user: root
-        pw: root
-        enc_type: None
+        aruba_axis1:     # The 1 here simply there if we needed more def creds
+            user: root
+            pw: 'cm9vdA=='
+            # The "enc_type" here is more obfscutaion type. pw cannot truly
+            # be "hidden" unless the application (Axis cameras here) support
+            # some type of auth. I have not found any so far
+            enc_type: base64
+
+pc_params:     # These are the parameters for people counter app
+    confidence: 0.2   # The confidence level above which objects are identified
 
 cams:
     - slr01_bldg_d_f1_elevators:
         display_name: Aruba SLR01 Bldg D Floor 1 Elevators
-        description: "Aruba, Sanat Clara Campus, Main Building, Floor 1, Elevators"
+        description: "Aruba, Santa Clara Campus, Main Building, Floor 1, Elevators"
         cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.18
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 1      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f1_elevators 
+
+    - slr01_bldg_d_f1_rear_lobby_entrance:
+        display_name: Aruba SLR01 Bldg D Floor 1 Rear Lobby Entrance
+        description: "Aruba, Santa Clara Campus, Main Building, Floor 1, Rear Lobby Entrance (Next to CEC Entrance)"
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.17
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
         kafka_topic: aruba_slr01_people_counter1
         kafka_partition: 1      # Or None if topic# need not be assigned
         kafka_key: slr01_bldg_d_f1_elevators 

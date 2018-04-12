@@ -11,6 +11,7 @@ import sys
 import json
 import time
 import yaml
+import logging
 import urllib.request
 import numpy as np
 
@@ -21,7 +22,6 @@ from urllib.parse import urlparse
 import count_people_fom_image as cp
 import pc_utils
 
-
 # Constamts
 
 # Config files (probably a good idea to move all config files to a single dir)
@@ -31,6 +31,11 @@ PC_CONFIG_YAML_FILE = './pc_config.yml'
 # KAFKA_BROKER = '10.2.13.29'
 # KAFKA_PORT = '9092'
 # KAFKA_TOPIC = 'peoplecounter1'
+
+# Set logging level
+logging.basicConfig(level=logging.INFO)
+# Set kafka module level higher
+logging.getLogger('kafka').setLevel(logging.WARNING)
 
 class people_count():
     def __init__(self, args):
@@ -58,6 +63,7 @@ class people_count():
         # Again, specifying format ver below here is non ideal
         self.msg_format_ver = '1.0.0'
 
+    # Private methods
     def _load_pc_configs(self, args):
         ''' Load all needed configs '''
         pc_yaml_fn = args['pc_config']
@@ -67,26 +73,39 @@ class people_count():
         with open(pc_yaml_fn) as pcfh:
             pc_config_dict = yaml.load(pcfh)
         self.pc_config = pc_utils.pc_config(pc_config_dict)
+        # Below is a hack for backwards compatibility. Should be removed
+        self.confidence = self.pc_config.confidence
 
         # Set camera config
         with open(cam_yaml_fn) as cfh:
             cam_config_dict = yaml.load(cfh)
-        self.cams_config = pc_utils.all_cams_config(cam_config_dict)
+        self.all_cams_config = pc_utils.all_cams_config(cam_config_dict)
 
-    def set_model(self, model_net):
-         self.net = model_net
+    # Public methods
+    def load_dnn_model(self):
+        ''' Load a model and weights. Currently hard coded to MobileNet SSD '''
+        logging.info('Loading model: {}'.format(self.model_file))
+        self.net = cv2.dnn.readNetFromCaffe(self.prototxt_file, self.model_file)
 
-    def connect_to_cam(self):
-        # First make the URL including the creds
-        # URLs with creds in them are of the form: 
-        #    'http://root:root@192.168.128.18/axis-cgi/mjpg/video.cgi'
+    def connect_all_cams(self):
+        ''' Connect to all specified cameras '''
+        # Go through all cameras and connect to them
+        # I know, this for loop can simply be done as: 
+        # for cam_obj in self.all_cams_config.cam_config. 
+        # But wanted to do it in order. 
+        # But again I know, I could have used ordered dict . . .
+        for cam_name in self.all_cams_config.all_cams_name:
+            logging.info('Connecting to camera: {}'.format(cam_name))
+            cam_obj = self.all_cams_config.cam_config[cam_name]
+            cam_obj.connect_to_cam()
 
-        parsed = urlparse(pcu.url)
-        url_creds = '{}://{}:{}@{}{}'.format(parsed.scheme, self.username,
-                                    self.password, parsed.netloc, parsed.path)
-        self.cap_handle = cv2.VideoCapture(url_creds)
-        # Any error checking?
-
+    def release_all_cams(self):
+        ''' Release all cameras' resources '''
+        # Go through all cameras and connect to them
+        for cam_name in self.all_cams_config.all_cams_name:
+            logging.info('Releasing camera: {}'.format(cam_name))
+            cam_obj = self.all_cams_config.cam_config[cam_name]
+            cam_obj.cam_release()
 
 # This is only if this is used as a main program
 def parse_args():
@@ -105,12 +124,6 @@ def send_message(message, kf_obj):
     # print(message)
     # The .encode is to convert str to bytes (utf-8 is default)
     kf_obj.producer.send(KAFKA_TOPIC, message.encode(), partition = 0)
-
-def load_dnn_model(pcu):
-    ''' Load a model and weights. Currently hard coded to MobileNet SSD '''
-    print("Loading model...")
-    net = cv2.dnn.readNetFromCaffe(pcu.prototxt_file, pcu.model_file)
-    pcu.set_model(net)
 
 def urllib_auth_url(pcu):
     ''' Authenticate a URL with provided username and password '''
@@ -145,53 +158,64 @@ def urllib_auth_url(pcu):
 def url_to_image(pcu):
     return pcu.cap_handle.read()
 
-def count_people_feed_kafka(pcu):
-    ''' Load image from the URL, count number of persons in it
+def count_people(pc):
+    ''' Load image from the cameras, count number of persons in it
         and feed kafka with the results '''
 
-    # Fetch an image
-    valid, image = url_to_image(pcu)
+    # Go through each camera and count the number of people in them
+    for cam_name in pc.all_cams_config.all_cams_name:
+        cam_obj = pc.all_cams_config.cam_config[cam_name]
+        valid, image = cam_obj.cap_handle.read()
 
-    # If image read failed, just do nothing and return:
-    if valid:
-        ided_persons = cp.id_people(pcu, image)
+        if valid:
+            cv2.imshow(cam_name, image)
+            cv2.waitKey(1)
+            ided_persons = cp.id_people(pc, image)
 
-        # If person(s) have been detected in this image, 
-        # feed the results to kafka
-        if len(ided_persons) > 0:
-            print('Person(s) detected in image')
-            for person in ided_persons:
-                timenow_secs = time.time()
-                person['detect_time'] = timenow_secs
-                person['stream_name'] = pcu.stream_name
-                person['msg_format_version'] = pcu.msg_format_ver
-                print(person)
-                person_json = json.dumps(dict(person))
-                send_message(person_json, pcu)
+            # If person(s) have been detected in this image, 
+            # feed the results to kafka
+            if len(ided_persons) > 0:
+                logging.info('Person(s) detected in image')
+                for person in ided_persons:
+                    timenow_secs = time.time()
+                    person['detect_time'] = timenow_secs
+                    # person['stream_name'] = pc.stream_name
+                    person['msg_format_version'] = pc.msg_format_ver
+                    logging.info(person)
+                    person_json = json.dumps(dict(person))
+                    # send_message(person_json, pc)
+            else:
+                print('No people IDed in image')
         else:
-            print('No people IDed in image')
-        return True
-    else:
-        return False
+            # If image read failed, log error
+            logging.error('Image read from camera {} failed'.format(cam_name))
 
-def main_loop(pcu):
+def cleanup():
+    ''' Cleanup before exiting '''
+    cv2.destroyAllWindows()
+    # Should anything be released on kafka and others?
+
+def main_loop(pc):
     ''' Continously detect persons and quit on keyboard interrupt '''
     try:
         while True:
-            count_people_feed_kafka(pcu)
+            count_people(pc)
     except KeyboardInterrupt:
         print('Received Ctrl-C. Exiting . . . ')
+        pc.release_all_cams()
+        cleanup()
         return ['Keyboard Interrupt']
 
 if __name__ == '__main__':
     # Initialize
-    pcu = people_count(parse_args())
-    print(pcu.pc_config.confidence)
-    sys.exit()
+    pc = people_count(parse_args())
     # Connect to camera
-    pcu.connect_to_cam()
-    # load our serialized model from disk
-    load_dnn_model(pcu)
+    pc.connect_all_cams()
+    # load our serialized model from disk (this can be part of init itself)
+    pc.load_dnn_model()
     # Do the main loop
-    main_loop(pcu)
+    main_loop(pc)
+    # Do the main loop
+    pc.release_all_cams()
+    cleanup()
 

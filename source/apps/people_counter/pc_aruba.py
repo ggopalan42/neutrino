@@ -19,7 +19,7 @@ from kafka import KafkaProducer
 from urllib.parse import urlparse
 
 # Local imports
-import count_people_fom_image as cp
+import count_people_from_image as cp
 import pc_utils
 
 # Constamts
@@ -34,7 +34,7 @@ PC_CONFIG_YAML_FILE = './pc_config.yml'
 
 # Set logging level
 logging.basicConfig(level=logging.INFO)
-# Set kafka module level higher
+# Set kafka module level higher. It spews a lot of junk
 logging.getLogger('kafka').setLevel(logging.WARNING)
 
 class people_count():
@@ -130,7 +130,7 @@ def urllib_auth_url(pcu):
     # Get the top level URL - I think this is what needs to be authenticated
     parsed = urlparse(pcu.url)
     top_level_url = '{}://{}'.format(parsed.scheme, parsed.netloc)
-    print('Authenticating top level URL: {}'.format(top_level_url))
+    logging.info('Authenticating top level URL: {}'.format(top_level_url))
 
     # create a password manager
     password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
@@ -168,9 +168,9 @@ def count_people(pc):
         valid, image = cam_obj.cap_handle.read()
 
         if valid:
+            ided_persons = cp.id_people(pc, image, display_predictions=False)
             cv2.imshow(cam_name, image)
             cv2.waitKey(1)
-            ided_persons = cp.id_people(pc, image)
 
             # If person(s) have been detected in this image, 
             # feed the results to kafka
@@ -185,7 +185,7 @@ def count_people(pc):
                     person_json = json.dumps(dict(person))
                     # send_message(person_json, pc)
             else:
-                print('No people IDed in image')
+                logging.info('No people IDed in image')
         else:
             # If image read failed, log error
             logging.error('Image read from camera {} failed'.format(cam_name))
@@ -201,7 +201,7 @@ def main_loop(pc):
         while True:
             count_people(pc)
     except KeyboardInterrupt:
-        print('Received Ctrl-C. Exiting . . . ')
+        logging.info('Received Ctrl-C. Exiting . . . ')
         pc.release_all_cams()
         cleanup()
         return ['Keyboard Interrupt']

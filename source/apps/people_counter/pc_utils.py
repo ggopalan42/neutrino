@@ -3,6 +3,7 @@
 
 import base64
 import yaml
+import cv2
 import logging
 
 
@@ -60,6 +61,14 @@ class single_cam_config():
         ''' Set the full camera URL from all other fields '''
         self.cam_url = '{}://{}:{}@{}/{}'.format(self.cam_proto, self.cam_user,
                                   self.cam_pw, self.cam_hostname, self.cam_uri)
+
+    def connect_to_cam(self):
+        ''' Use the URL to connect to camera and set the camera handle '''
+        self.cap_handle = cv2.VideoCapture(self.cam_url)
+
+    def cam_release(self):
+        ''' Release the camera resources '''
+        self.cap_handle.release()
 
 class all_cams_config():
     ''' This class holds the configs and defaults of all cameras '''

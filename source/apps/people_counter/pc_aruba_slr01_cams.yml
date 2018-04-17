@@ -11,8 +11,32 @@ defaults:
 pc_params:     # These are the parameters for people counter app
     confidence: 0.2   # The confidence level above which objects are identified
 
+# Cams fields explained:
+#   - cam_name:    -> Name of camera. Internal use and may appear in logs
+#       valid:         -> If set, this entire cam config is valid and
+#                         will be processed
+#       display_name:  -> Name displayed when showing images. 
+#                         Either in cv2.imshow or on web interface
+#       description:   -> A full, wordy description of the camera
+#       cam_type:      -> Currently supported cam types:
+#                            1) axis_vapix_P3364
+#       cam_proto:     -> proto to be used (http, https, etc) 
+#       cam_hostname:  -> Hostname or IP addr 
+#       cam_uri:       -> URI used to access video of the cam
+#       cam_creds:     -> If using default creds, specify from default list
+#       write_to_file: -> If set, will also write to file
+#       read_from_file: -> If set, will read from file instead of from cam
+#       display_image:  -> If set, will show the image with a cv2.imshow
+#       display_predictions -> If set, will draw a box around the detected obj
+#                              and name it with prediction confidence level
+#       kafka_topic:    -> Self explanatory
+#       kafka_partition: -> Self explanatory
+#       kafka_key:       -> Key used when partition not specified
+
+
 cams:
     - slr01_bldg_d_f1_elevators:
+        valid: True
         display_name: Aruba SLR01 Bldg D Floor 1 Elevators
         description: "Aruba, Santa Clara Campus, Main Building, Floor 1, Elevators"
         cam_type: axis_vapix_P3364
@@ -20,11 +44,16 @@ cams:
         cam_hostname: 192.168.128.18
         cam_uri: axis-cgi/mjpg/video.cgi
         cam_creds: aruba_axis1
+        # read_from_file: slr01_bldg_d_f1_elevators_save1.mjpg
+        # write_to_file: vid1.mjpg
+        display_image: True
+        display_predictions: True
         kafka_topic: aruba_slr01_people_counter1
         kafka_partition: 1      # Or None if topic# need not be assigned
         kafka_key: slr01_bldg_d_f1_elevators 
 
     - slr01_bldg_d_f1_rear_lobby_entrance:
+        valid: True
         display_name: Aruba SLR01 Bldg D Floor 1 Rear Lobby Entrance
         description: "Aruba, Santa Clara Campus, Main Building, Floor 1, Rear Lobby Entrance (Next to CEC Entrance)"
         cam_type: axis_vapix_P3364
@@ -32,6 +61,10 @@ cams:
         cam_hostname: 192.168.128.17
         cam_uri: axis-cgi/mjpg/video.cgi
         cam_creds: aruba_axis1
+        # read_from_file: slr01_bldg_d_f1_rear_lobby_entrance_save1.mjpg
+        # write_to_file: vid2.mjpg
+        display_image: True
+        display_predictions: True
         kafka_topic: aruba_slr01_people_counter1
         kafka_partition: 4      # Or None if topic# need not be assigned
         kafka_key: slr01_bldg_d_f1_elevators 

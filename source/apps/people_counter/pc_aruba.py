@@ -95,7 +95,7 @@ class people_count():
         # But wanted to do it in order. 
         # But again I know, I could have used ordered dict . . .
         for cam_name in self.all_cams_config.all_cams_name:
-            logging.info('Connecting to camera: {}'.format(cam_name))
+            # logging.info('Connecting to camera: {}'.format(cam_name))
             cam_obj = self.all_cams_config.cam_config[cam_name]
             cam_obj.connect_to_cam()
 
@@ -165,12 +165,19 @@ def count_people(pc):
     # Go through each camera and count the number of people in them
     for cam_name in pc.all_cams_config.all_cams_name:
         cam_obj = pc.all_cams_config.cam_config[cam_name]
-        valid, image = cam_obj.cap_handle.read()
+        valid_image, image = cam_obj.cap_handle.read()
 
-        if valid:
-            ided_persons = cp.id_people(pc, image, display_predictions=False)
-            cv2.imshow(cam_name, image)
-            cv2.waitKey(1)
+        if valid_image:
+            # Write image to file if requested. Note here that the image
+            # is written is as captured from cam (i.e. not annonated)
+            if cam_obj.videowriter:
+                cam_obj.videowriter.write(image)
+            ided_persons = cp.id_people(pc, image, 
+                                           cam_obj.display_predictions)
+            # Show image if requested.
+            if cam_obj.display_image:
+                cv2.imshow(cam_name, image)
+                cv2.waitKey(1)
 
             # If person(s) have been detected in this image, 
             # feed the results to kafka
@@ -188,7 +195,8 @@ def count_people(pc):
                 logging.info('No people IDed in image')
         else:
             # If image read failed, log error
-            logging.error('Image read from camera {} failed'.format(cam_name))
+            logging.error('Image read from camera {} failed.(error ret = {}'
+                                                .format(cam_name, valid_image))
 
 def cleanup():
     ''' Cleanup before exiting '''

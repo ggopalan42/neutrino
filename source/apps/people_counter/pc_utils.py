@@ -2,6 +2,7 @@
 ''' Utilities for People Counter application '''
 
 import base64
+import sys
 import yaml
 import cv2
 import logging
@@ -22,6 +23,7 @@ class single_cam_config():
         # And surely there is a better way to do this doc?
         cam_name = list(cam_dict.keys())[0]
         self.cam_name = cam_name
+        self.valid = cam_dict[cam_name]['valid']
         self.display_name = cam_dict[cam_name]['display_name']
         self.description = cam_dict[cam_name]['description']
         self.cam_type = cam_dict[cam_name]['cam_type']
@@ -29,10 +31,15 @@ class single_cam_config():
         self.cam_hostname = cam_dict[cam_name]['cam_hostname']
         self.cam_uri = cam_dict[cam_name]['cam_uri']
         self.cam_creds = cam_dict[cam_name]['cam_creds']  ###
+        self.display_image = cam_dict[cam_name]['display_image']
+        self.display_predictions = cam_dict[cam_name]['display_predictions']
         self.kafka_topic = cam_dict[cam_name]['kafka_topic']
         self.kafka_partition = cam_dict[cam_name]['kafka_partition']  ###
         self.kafka_key = cam_dict[cam_name]['kafka_key']
-
+        self.write_to_file = cam_dict[cam_name]['write_to_file']     \
+                          if 'write_to_file' in cam_dict[cam_name] else False
+        self.read_from_file = cam_dict[cam_name]['read_from_file']     \
+                          if 'read_from_file' in cam_dict[cam_name] else False
         self._set_creds(cam_dict[cam_name]['cam_creds'], default_creds)
         self._set_cam_url()
 
@@ -62,9 +69,37 @@ class single_cam_config():
         self.cam_url = '{}://{}:{}@{}/{}'.format(self.cam_proto, self.cam_user,
                                   self.cam_pw, self.cam_hostname, self.cam_uri)
 
+    def set_videowriter(self):
+        ''' Set video write handler '''
+        if self.write_to_file:
+            logging.info('Setting video writer handle for cam {}'
+                                                     .format(self.cam_name))
+            self.videowriter = cv2.VideoWriter(self.write_to_file,
+                                 cv2.VideoWriter_fourcc('M','J','P','G'), 
+                                 self.cap_frame_fps,
+                                 (self.cap_fwidth,self.cap_fheight))
+        else:
+            self.videowriter = False
+
+
     def connect_to_cam(self):
-        ''' Use the URL to connect to camera and set the camera handle '''
-        self.cap_handle = cv2.VideoCapture(self.cam_url)
+        ''' Connect to the camera URL or read from file if so specified '''
+        if self.read_from_file:
+            logging.info('Reading from file: {}. (Cam name: {})'
+                               .format(self.read_from_file, self.cam_name))
+            self.cap_handle = cv2.VideoCapture(self.read_from_file)
+        else:
+            logging.info('Connecting to camera: {}'.format(self.cam_name))
+            self.cap_handle = cv2.VideoCapture(self.cam_url)
+        # Once connected, set a few useful camera props
+        self.cap_fwidth = int(self.cap_handle.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.cap_fheight = int(self.cap_handle.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.cap_frame_fps = int(self.cap_handle.get(cv2.CAP_PROP_FPS))
+        # After connecting, call set videowriter
+        # Its a little weird to do it at this stage
+        # but a few params (like video height & width) are needed for video
+        # writer. So it needs to be done only after connecting
+        self.set_videowriter()
 
     def cam_release(self):
         ''' Release the camera resources '''
@@ -75,7 +110,7 @@ class all_cams_config():
     def __init__(self, cfg_yaml_dict):
         self.cam_config = {}
         self.all_cams_name = []
-        self.cam_config_dict = cfg_yaml_dict
+        self.cam_config_dict = cfg_yaml_dict['cams']
         # Set all of the default creds
         self.default_creds = cfg_yaml_dict['defaults']['creds']
         # Now setup all of the cams with their params
@@ -83,11 +118,13 @@ class all_cams_config():
 
     # Private methods
     def _setup_all_cam_configs(self):
-        for cam in self.cam_config_dict['cams']:
+        for cam in self.cam_config_dict:
             cam_name = list(cam.keys())[0]
-            self.all_cams_name.append(cam_name)
-            cam_obj = single_cam_config(cam, self.default_creds)
-            self.cam_config[cam_name] = cam_obj
+            # Only set single cam configs if valid field is set to True
+            if cam[cam_name]['valid']:
+                self.all_cams_name.append(cam_name)
+                cam_obj = single_cam_config(cam, self.default_creds)
+                self.cam_config[cam_name] = cam_obj
  
 if __name__ == '__main__':
     # mostly for testing

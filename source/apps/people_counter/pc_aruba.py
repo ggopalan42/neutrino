@@ -19,7 +19,7 @@ from kafka import KafkaProducer
 from urllib.parse import urlparse
 
 # Local imports
-import count_people_from_image as cp
+# import count_people_from_image as cp
 import pc_utils
 
 # Constamts
@@ -172,10 +172,13 @@ def count_people(pc):
             # is written is as captured from cam (i.e. not annonated)
             if cam_obj.videowriter:
                 cam_obj.videowriter.write(image)
-            ided_persons = cp.id_people(pc, image, 
+            ided_persons = pc_utils.id_people(pc, image, 
                                            cam_obj.display_predictions)
             # Show image if requested.
             if cam_obj.display_image:
+                cv2.namedWindow(cam_name)
+                # cv2.moveWindow(cam_name, 100, 100)
+                # cv2.imshow(cam_name, cv2.resize(image, (960,540)))
                 cv2.imshow(cam_name, image)
                 cv2.waitKey(1)
 

@@ -32,6 +32,9 @@ PC_CONFIG_YAML_FILE = './pc_config.yml'
 # KAFKA_PORT = '9092'
 # KAFKA_TOPIC = 'peoplecounter1'
 
+
+# Other vars
+
 # Set logging level
 logging.basicConfig(level=logging.INFO)
 # Set kafka module level higher. It spews a lot of junk
@@ -158,16 +161,57 @@ def urllib_auth_url(pcu):
 def url_to_image(pcu):
     return pcu.cap_handle.read()
 
+first_frame = None
 def count_people(pc):
     ''' Load image from the cameras, count number of persons in it
         and feed kafka with the results '''
 
+    global first_frame
     # Go through each camera and count the number of people in them
     for cam_name in pc.all_cams_config.all_cams_name:
         cam_obj = pc.all_cams_config.cam_config[cam_name]
         valid_image, image = cam_obj.cap_handle.read()
 
         if valid_image:
+            ############### GG Expts ############################
+            image_copy = image.copy()
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            gray = cv2.GaussianBlur(gray, (21, 21), 0)
+            # If first frame not grabbed, please do so now
+            if first_frame is None:
+                first_frame = gray
+                continue
+
+            # compute the absolute difference between the current frame and
+            # first frame
+            frameDelta = cv2.absdiff(first_frame, gray)
+
+            # Subtract the background
+            bgsub_img = cam_obj.bgsub.apply(gray)
+            # Gaussian blur to background subtracted image
+            # bgsub_gray = cv2.GaussianBlur(bgsub_img, (21, 21), 0)
+
+            thresh = cv2.threshold(bgsub_img, 25, 255, cv2.THRESH_BINARY)[1]
+            # dilate the thresholded image to fill in holes, then find contours
+            # on thresholded image
+            dilated = cv2.dilate(thresh, None, iterations=2)
+            # Find the countours of this processed frame
+            _, cnts, _ = cv2.findContours(dilated.copy(), 
+                                    cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            # loop over the contours
+            for c in cnts:
+                # if the contour is too small, ignore it
+                if cv2.contourArea(c) < 12000:
+                    continue
+                # compute the bounding box for the contour, 
+                # draw it on the frame,and update the text
+                (x, y, w, h) = cv2.boundingRect(c)
+                cv2.rectangle(image_copy, (x, y),(x + w, y + h), (0, 255, 0), 2)
+                rectangleCenterPont = (int((x + x + w) /2), int((y + y + h) /2))
+                cv2.circle(image_copy, rectangleCenterPont, 1, (0, 0, 255), 5)
+            ############### End GG Expts ############################
+
+
             # Write image to file if requested. Note here that the image
             # is written is as captured from cam (i.e. not annonated)
             if cam_obj.videowriter:
@@ -176,10 +220,36 @@ def count_people(pc):
                                            cam_obj.display_predictions)
             # Show image if requested.
             if cam_obj.display_image:
-                cv2.namedWindow(cam_name)
-                # cv2.moveWindow(cam_name, 100, 100)
+                ############### GG Expts ############################
+                gray_name = '{}-{}'.format(cam_name, 'gray')
+                cv2.namedWindow(gray_name)
+                cv2.moveWindow(gray_name, 0, 0)
+                cv2.imshow(gray_name, pc_utils.resize_half(gray))
+                # delta_name = '{}-{}'.format(cam_name, 'delta')
+                # cv2.namedWindow(delta_name)
+                # cv2.imshow(delta_name, frameDelta)
+                bg_sub_name = '{}-{}'.format(cam_name, 'bg_sub_name')
+                cv2.namedWindow(bg_sub_name)
+                cv2.moveWindow(bg_sub_name, 640, 0)
+                cv2.imshow(bg_sub_name, pc_utils.resize_half(bgsub_img))
+                tresh_name = '{}-{}'.format(cam_name, 'tresh')
+                cv2.moveWindow(tresh_name, 1280, 0)
+                cv2.namedWindow(tresh_name)
+                cv2.imshow(tresh_name, pc_utils.resize_half(thresh))
+                dilated_name = '{}-{}'.format(cam_name, 'dilated')
+                cv2.namedWindow(dilated_name)
+                cv2.moveWindow(dilated_name, 1920, 0)
+                cv2.imshow(dilated_name, pc_utils.resize_half(dilated))
+                copy_image_name = '{}-{}'.format(cam_name, 'copy')
+                cv2.namedWindow(copy_image_name)
+                cv2.moveWindow(copy_image_name, 640, 580)
+                cv2.imshow(copy_image_name, pc_utils.resize_half(image_copy))
+                ############### End GG Expts ############################
+                # cv2.moveWindow(gray_name, 500, 0)
                 # cv2.imshow(cam_name, cv2.resize(image, (960,540)))
-                cv2.imshow(cam_name, image)
+                cv2.namedWindow(cam_name)
+                cv2.moveWindow(cam_name, 0, 580)
+                cv2.imshow(cam_name, pc_utils.resize_half(image))
                 cv2.waitKey(1)
 
             # If person(s) have been detected in this image, 

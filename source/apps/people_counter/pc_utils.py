@@ -102,6 +102,9 @@ class single_cam_config():
         # but a few params (like video height & width) are needed for video
         # writer. So it needs to be done only after connecting
         self.set_videowriter()
+        # And also set the background subtractor object
+        self.bgsub = cv2.createBackgroundSubtractorMOG2(detectShadows = True)
+
 
     def cam_release(self):
         ''' Release the camera resources '''
@@ -127,6 +130,18 @@ class all_cams_config():
                 self.all_cams_name.append(cam_name)
                 cam_obj = single_cam_config(cam, self.default_creds)
                 self.cam_config[cam_name] = cam_obj
+
+def resize_half(image):
+    ''' Resizes any image given to it by half '''
+    img_half_h = int(image.shape[0]/2)
+    img_half_w = int(image.shape[1]/2)
+    return cv2.resize(image, (img_half_w, img_half_h))
+
+def resize_qtr(image):
+    ''' Resizes any image given to it by half '''
+    img_half_h = int(image.shape[0]/4)
+    img_half_w = int(image.shape[1]/4)
+    return cv2.resize(image, (img_half_w, img_half_h))
 
 def process_detections(pi_obj, image, detections, display_predictions = False):
     ''' Go over each object detected and if its a person, return the

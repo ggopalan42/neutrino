@@ -28,9 +28,9 @@ import pc_utils
 CAM_CONFIG_YAML_FILE = './pc_aruba_slr01_cams.yml'
 PC_CONFIG_YAML_FILE = './pc_config.yml'
 
-# KAFKA_BROKER = '10.2.13.29'
-# KAFKA_PORT = '9092'
-# KAFKA_TOPIC = 'peoplecounter1'
+KAFKA_BROKER = '10.2.13.29'
+KAFKA_PORT = '9092'
+KAFKA_TOPIC = 'peoplecounter1'
 
 
 # Other vars
@@ -260,10 +260,12 @@ def count_people(pc):
                     timenow_secs = time.time()
                     person['detect_time'] = timenow_secs
                     # person['stream_name'] = pc.stream_name
+                    # tmp for now
+                    person['stream_name'] = 'Aruba_SLR01_Cams'
                     person['msg_format_version'] = pc.msg_format_ver
                     logging.info(person)
                     person_json = json.dumps(dict(person))
-                    # send_message(person_json, pc)
+                    send_message(person_json, pc)
             else:
                 logging.info('No people IDed in image')
         else:

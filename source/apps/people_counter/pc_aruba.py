@@ -265,7 +265,7 @@ def count_people(pc):
                     person['msg_format_version'] = pc.msg_format_ver
                     logging.info(person)
                     person_json = json.dumps(dict(person))
-                    send_message(person_json, pc)
+                    # send_message(person_json, pc)
             else:
                 logging.info('No people IDed in image')
         else:

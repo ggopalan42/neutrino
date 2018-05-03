@@ -1,0 +1,14 @@
+model:
+    model_name: MobileNetSSD_V1
+    model_description: TBD
+    model_file: ./models/MobileNetSSD_deploy.caffemodel      # Model file
+    prototxt_file: ./models/MobileNetSSD_deploy.prototxt.txt # Weights file
+    object_filter:
+        - person
+
+    model_params:
+        object_classes: "background  aeroplane bicycle bird boat bottle bus \
+                        car cat chair cow diningtable dog horse motorbike \
+                        person pottedplant sheep sofa train tvmonitor"
+        confidence: 0.2 
+        

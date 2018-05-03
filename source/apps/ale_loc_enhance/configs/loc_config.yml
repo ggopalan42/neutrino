@@ -1,5 +1,5 @@
-obj_id_params:        # These are the parameters for object identification
-    confidence: 0.2   # The confidence level above which objects are identified
+default_params:
+    kafka_msg_format_ver: 1.0.0
 
 kafka:
     kafka_broker_hostname: '10.2.13.29'
@@ -13,6 +13,10 @@ ale_params:     # These are the parameters for the Aruba ALE
 cams_config:         # Config of camera information
     cams_config_fn:
         - aruba_cams.yml  
+
+ml_config:           # Config of various ML parameters
+    obj_det_model_configs:
+        - mobilenet_ssd_v1_fn: mobilenet_ssd_v1.yml
 
 # Aruba Campus info
 # This information was gotten from ALE via the REST interface. Mostly

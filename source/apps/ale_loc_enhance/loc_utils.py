@@ -6,17 +6,107 @@ import sys
 import yaml
 import cv2
 import logging
+import os
 
 from timeit import default_timer
+from kafka import KafkaProducer
 import numpy as np
 
-class pc_config():
-    ''' Object that holds all People Counter specific paramaters '''
-    def __init__(self, pc_config_dict):
-        self.confidence = pc_config_dict['pc_params']['confidence']
-        self.kafka_broker_hostname = pc_config_dict['kafka']['kafka_broker_hostname']
-        self.kafka_port = pc_config_dict['kafka']['kafka_broker_port']
+# Config files (probably a good idea to move all config files to a single dir)
+CONFIG_BASE = './configs'
 
+class loc_config():
+    ''' Object that holds all location specific paramaters '''
+    def __init__(self, args):
+        # Load all configs
+        self.args = args
+        self._load_configs(args)
+
+        # previous_det is a stupid hack. See explanation below
+        self.previous_det = np.array([[[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]]])
+        # Not too sure if below should go into a YAML file somewhere
+        self.colors = np.random.uniform(0, 255, size=(len(self.classes), 3))
+
+    # Private methods
+    def _load_configs(self, args):
+        ''' Load all needed configs '''
+        loc_yaml_fn = args['config']
+
+        # Set loc config
+        with open(loc_yaml_fn) as locfh:
+            loc_config_dict = yaml.load(locfh)
+        # Set default params
+        default_params = loc_config_dict['default_params']
+        self.msg_format_ver = ['kafka_msg_format_ver']
+        # Set kafka params
+        kafka_params = loc_config_dict['kafka']
+        self.kafka_broker_hostname = kafka_params['kafka_broker_hostname']
+        self.kafka_broker_port = kafka_params['kafka_broker_port']
+        self.producer=KafkaProducer(bootstrap_servers= '{}:{}'.format(
+                                    self.kafka_broker_hostname,
+                                    self.kafka_broker_port))
+        # Load ALE params
+        ale_params = loc_config_dict['ale_params']
+        self.ale_rem_hostname: ale_params['ale_rem_hostname'] 
+        self.ale_rem_port: ale_params['ale_rem_port'] 
+        # Load Cams config
+        cams_config = loc_config_dict['cams_config']
+        self._load_cams_config(cams_config)
+        dnn_configs = loc_config_dict['ml_config']
+        self._load_dnn_configs(dnn_configs)
+
+    def _load_cams_config(self, cams_config):
+        ''' Load the camera configs '''
+        # For now, simply load a single cam config yaml file. Later
+        # expand to multiple cams
+        cam_yaml_fn = os.path.join(CONFIG_BASE,cams_config['cams_config_fn'][0])
+        with open(cam_yaml_fn) as cfh:
+            cam_config_dict = yaml.load(cfh)
+        self.all_cams_config = all_cams_config(cam_config_dict)
+
+    def _load_dnn_configs(self, dnn_configs):
+        ''' Load configs for various models '''
+        obj_det_models = dnn_configs['obj_det_model_configs']
+        # Again, for now, load only the single model config. Later
+        # expand to multiple models
+        mobilenet_ssd_v1_fn = os.path.join(CONFIG_BASE, 
+                                 obj_det_models[0]['mobilenet_ssd_v1_fn'])
+        print(mobilenet_ssd_v1_fn)
+        with open(mobilenet_ssd_v1_fn) as mfh:
+            ssd_config_dict = yaml.load(mfh)
+        model = ssd_config_dict['model']
+        self.model_file = model['model_file']
+        self.prototxt_file = model['prototxt_file']
+        self.classes = model['model_params']['object_classes'].split()
+        # Again, below is using only first element. Later expand to a list
+        self.person_idx = self.classes.index(model['object_filter'][0])
+        self.confidence = model['model_params']['confidence']
+
+   # Public methods
+    def load_dnn_model(self):
+        ''' Load a model and weights. Currently hard coded to MobileNet SSD '''
+        logging.info('Loading model: {}'.format(self.model_file))
+        self.net = cv2.dnn.readNetFromCaffe(self.prototxt_file, self.model_file)
+
+    def connect_all_cams(self):
+        ''' Connect to all specified cameras '''
+        # Go through all cameras and connect to them
+        # I know, this for loop can simply be done as: 
+        # for cam_obj in self.all_cams_config.cam_config. 
+        # But wanted to do it in order. 
+        # But again I know, I could have used ordered dict . . .
+        for cam_name in self.all_cams_config.all_cams_name:
+            # logging.info('Connecting to camera: {}'.format(cam_name))
+            cam_obj = self.all_cams_config.cam_config[cam_name]
+            cam_obj.connect_to_cam()
+
+    def release_all_cams(self):
+        ''' Release all cameras' resources '''
+        # Go through all cameras and connect to them
+        for cam_name in self.all_cams_config.all_cams_name:
+            logging.info('Releasing camera: {}'.format(cam_name))
+            cam_obj = self.all_cams_config.cam_config[cam_name]
+            cam_obj.cam_release()
 
 class single_cam_config():
     ''' Object that holds the config and methods of one camera '''
@@ -228,6 +318,7 @@ def id_people(pi_obj, image, display_predictions = False):
  
 if __name__ == '__main__':
     # mostly for testing
+    ''' Needs fixin'
     CAM_CONFIG_YAML_FILE = 'pc_aruba_slr01_cams.yml'
     PC_CONFIG_YAML_FILE = 'pc_config.yml'
 
@@ -244,4 +335,4 @@ if __name__ == '__main__':
 
     pcc = pc_config(pc_config_yaml)
     print(pcc.confidence)
-
+    '''

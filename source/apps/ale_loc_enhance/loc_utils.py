@@ -15,6 +15,10 @@ import numpy as np
 # Config files (probably a good idea to move all config files to a single dir)
 CONFIG_BASE = './configs'
 
+# Set logging level
+# Set logging level
+logging.basicConfig(level=logging.INFO)
+
 class loc_config():
     ''' Object that holds all location specific paramaters '''
     def __init__(self, args):
@@ -31,6 +35,7 @@ class loc_config():
     def _load_configs(self, args):
         ''' Load all needed configs '''
         loc_yaml_fn = args['config']
+        logging.info('Loading Location config from: {}'.format(loc_yaml_fn))
 
         # Set loc config
         with open(loc_yaml_fn) as locfh:
@@ -71,7 +76,6 @@ class loc_config():
         # expand to multiple models
         mobilenet_ssd_v1_fn = os.path.join(CONFIG_BASE, 
                                  obj_det_models[0]['mobilenet_ssd_v1_fn'])
-        print(mobilenet_ssd_v1_fn)
         with open(mobilenet_ssd_v1_fn) as mfh:
             ssd_config_dict = yaml.load(mfh)
         model = ssd_config_dict['model']
@@ -103,6 +107,7 @@ class loc_config():
     def release_all_cams(self):
         ''' Release all cameras' resources '''
         # Go through all cameras and connect to them
+        print(self.all_cams_config.all_cams_name)
         for cam_name in self.all_cams_config.all_cams_name:
             logging.info('Releasing camera: {}'.format(cam_name))
             cam_obj = self.all_cams_config.cam_config[cam_name]
@@ -124,6 +129,8 @@ class single_cam_config():
         self.cam_uri = cam_dict[cam_name]['cam_uri']
         self.cam_creds = cam_dict[cam_name]['cam_creds']  ###
         self.display_image = cam_dict[cam_name]['display_image']
+        self.building_id = cam_dict[cam_name]['building_id']
+        self.floor_id = cam_dict[cam_name]['floor_id']
         self.display_predictions = cam_dict[cam_name]['display_predictions']
         self.kafka_topic = cam_dict[cam_name]['kafka_topic']
         self.kafka_partition = cam_dict[cam_name]['kafka_partition']  ###

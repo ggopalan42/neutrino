@@ -19,40 +19,49 @@ import json
 import cv2
 import logging
 
-import schema_pb2 as loco_pb2
 import google.protobuf as pb
-import ale_json_format as jsonf
 import numpy as np
 
+# Local imports
+from ale_libs import ale_json_format as jsonf
+from ale_libs import schema_pb2 as loco_pb2
+
 # Constants
-CONFIG_BASE = '../configs'
-IMAGES_BASE = '../images'
-ALE_CONFIG_YAML_FILE = os.path.join(CONFIG_BASE, 'pc_ale_config.yml')
-AGE_OUT_PERIOD = 60 * 10     # 10 minutes
+# AGE_OUT_PERIOD = 60 * 10     # 10 minutes
+AGE_OUT_PERIOD = 30     # 10 minutes
 
-
-# TMP_FLOOR_ID = '99E9DB7AAEA13F07B783CB4650811630'    # 1st floor
-TMP_FLOOR_ID = '044EBA35ADB937D9B20F040E1C1CC5CB'      # 3rd floor
-
+# All Tmp Stuff Below
+STARTX = 300
+ENDX = 1000
+STARTY = 300
+ENDY = 1100
+LOC_WRITE_FN = None
+# LOC_WRITE_FN = 'loc_corr_f3_elevators_ale_r1.npy'
 
 
 # Set logging level
 logging.basicConfig(level=logging.INFO)
 
-class ale_utils():
-    def __init__(self, ale_config_file = ALE_CONFIG_YAML_FILE):
+class ale_config():
+    def __init__(self, args):
         # Load ALE configs
-        self._load_ale_configs(ale_config_file)
+        self.args = args
+        self._load_ale_configs()
         self._age_out_period = AGE_OUT_PERIOD
+        if LOC_WRITE_FN:
+            self.nparray_stream = np.empty((604,800,3), np.uint8)
 
     # Private methods
-    def _load_ale_configs(self, ale_config_file):
+    def _load_ale_configs(self):
         ''' Load all needed configs '''
+        ale_config_file = self.args['config'] 
+        logging.info('Loading ALE config from file: {}'.format(ale_config_file))
         # Set people counter config
         with open(ale_config_file) as alefh:
             ale_config_dict = yaml.load(alefh)
         self.ale_rem_server = ale_config_dict['ale_params']['ale_rem_hostname']
         self.ale_rem_port = ale_config_dict['ale_params']['ale_rem_port']
+        self.images_base = ale_config_dict['ale_params']['images_base']
         # For now, unfurl this stuff into separate dicts. Later a hierarchy may
         # be needed
         self.campus_info = {}
@@ -80,7 +89,6 @@ class ale_utils():
                                   'floor_image_fn': floors[floor]['floor_image'],
                                 }
 
-
     # Public methods
     def age_out_locs(self, locs_dict):
         ''' Age out entries in the locs dict '''
@@ -93,7 +101,7 @@ class ale_utils():
                 delete_list.append(key)
 
         for key in delete_list:
-            print('Deleting key: {}'.format(key))
+            logging.info('Deleting key: {}'.format(key))
             del locs_dict[key]
 
     def connect_to_server(self):
@@ -105,6 +113,10 @@ class ale_utils():
                                                      self.ale_rem_port)
         logging.info('ZMQ connecting to {}'.format(connect_str))
         self.socket.connect(connect_str)
+
+    def disconnect(self):
+        ''' Close connection to server '''
+        self.socket.close()
 
     def subscribe_to_topics(self, topic):
         ''' Subscribe to a topic. lated extend to list of topics '''
@@ -136,11 +148,11 @@ class ale_utils():
     def load_floor_images(self):
         ''' Using cv2, load all floor images into numpy arrays '''
         for floor_id in self.floor_info:
-            floor_fn = os.path.join(IMAGES_BASE, 
+            floor_fn = os.path.join(self.images_base, 
                                   self.floor_info[floor_id]['floor_image_fn'])
             floor_name = self.floor_info[floor_id]['floor_name']
             floor_image = cv2.imread(floor_fn)
-            print('Loading floor Image: {}'.format(floor_name))
+            logging.info('Loading floor Image: {}'.format(floor_name))
             self.floor_info[floor_id]['floor_image'] = floor_image
             # Set the floor image length and width in pixel count
             self.floor_info[floor_id]['floor_image'] = floor_image
@@ -155,24 +167,30 @@ class ale_utils():
                            (float(floor_image.shape[0])/
                           float(self.floor_info[floor_id]['floor_dwg_length']))
 
-    def show_floor_image(self):
-        ''' Tmp: For now show only single floor image '''
-        floor_name = self.floor_info[TMP_FLOOR_ID]['floor_name']
-        floor_unique_name = '{} {}'.format(floor_name, TMP_FLOOR_ID)
+    def show_floor_images(self, floor_id_list):
+        ''' Load all floor images identified in list and show them '''
+        cv2_named_windows = {}
+        for floor_id in floor_id_list:
+            floor_name = self.floor_info[floor_id]['floor_name']
+            floor_unique_name = '{} {}'.format(floor_name, floor_id)
+            cv2_named_windows[floor_id] = floor_unique_name
         
-        # Draw the floor image
-        cv2.namedWindow(floor_unique_name)
-        cv2.imshow(floor_unique_name, self.floor_info[TMP_FLOOR_ID]['floor_image'])
-        cv2.waitKey(1)
-        time.sleep(10)
-        return floor_unique_name
+            # Draw the floor image
+            cv2.namedWindow(floor_unique_name)
+            floor_image = self.floor_info[floor_id]['floor_image']
+            print(floor_image.shape)
+            # Tmp Cut
+            cv2.imshow(floor_unique_name, floor_image[STARTX:ENDX, STARTY:ENDY])
+            cv2.waitKey(1)
+            time.sleep(20)
+        return cv2_named_windows
 
     def draw_locs(self, floor_id, locs_dict):
         ''' Draw circles also showing uncertanity onto floor_id's image '''
-        floor_image = self.floor_info[TMP_FLOOR_ID]['floor_image']
+        floor_image = self.floor_info[floor_id]['floor_image']
         floor_image_copy = floor_image.copy()
-        width_ratio = self.floor_info[TMP_FLOOR_ID]['width_ratio']
-        length_ratio = self.floor_info[TMP_FLOOR_ID]['length_ratio']
+        width_ratio = self.floor_info[floor_id]['width_ratio']
+        length_ratio = self.floor_info[floor_id]['length_ratio']
         # print('Image Shape: {}'.format(floor_image.shape))
         # Circle params. Move to the class later
         cir_radius = 3
@@ -206,7 +224,13 @@ class ale_utils():
             cv2.putText(floor_image_copy, station_id_abbr, txt_left_corner,
                     txt_font, txt_font_scale, txt_font_color, txt_line_type)
 
-        cv2.imshow(floor_id, floor_image_copy)
+        if LOC_WRITE_FN:
+            print(self.nparray_stream.shape)
+            print(floor_image_copy[STARTX:ENDX, STARTY:ENDY].shape)
+            self.nparray_stream = np.append(self.nparray_stream,
+                         floor_image_copy[STARTX:ENDX, STARTY:ENDY], axis = 0)
+            np.save(LOC_WRITE_FN, self.nparray_stream)
+        cv2.imshow(floor_id, floor_image_copy[STARTX:ENDX, STARTY:ENDY])
         cv2.waitKey(1)
 
 def cook_up_locs():

@@ -21,12 +21,14 @@ from urllib.parse import urlparse
 # Local imports
 # import count_people_from_image as cp
 import pc_utils
+from  gait_utils import estimate_gait as gait
 
 # Constamts
 
 # Config files (probably a good idea to move all config files to a single dir)
 CAM_CONFIG_YAML_FILE = './pc_aruba_slr01_cams.yml'
 PC_CONFIG_YAML_FILE = './pc_config.yml'
+GAIT_CONFIG_YAML_FILE = './gait_utils/gait_config.yml'
 
 KAFKA_BROKER = '10.2.13.29'
 KAFKA_PORT = '9092'
@@ -45,6 +47,7 @@ class people_count():
         # Load all configs
         self.args = args
         self._load_pc_configs(args)
+        self._load_gait_configs(gait_init_fn = GAIT_CONFIG_YAML_FILE)
         
         self.auth_done = False    # Auth needs to be done only once
         #### All of this below should go into config files ###
@@ -52,8 +55,8 @@ class people_count():
         self.previous_det = np.array([[[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]]])
         # Currently using the Mobilenet SSD models. Later make this
         # stuff more dynamic
-        self.prototxt_file = './models/MobileNetSSD_deploy.prototxt.txt'
-        self.model_file = './models/MobileNetSSD_deploy.caffemodel'
+        self.prototxt_file = '/home/ggopalan/data/models/MobileNetSSD_deploy.prototxt.txt'
+        self.model_file = '/home/ggopalan/data/models/MobileNetSSD_deploy.caffemodel'
         self.classes = ["background", "aeroplane", "bicycle", "bird", "boat",
                 "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
                 "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
@@ -83,6 +86,10 @@ class people_count():
         with open(cam_yaml_fn) as cfh:
             cam_config_dict = yaml.load(cfh)
         self.all_cams_config = pc_utils.all_cams_config(cam_config_dict)
+
+    def _load_gait_configs(self, gait_init_fn):
+        ''' Load gait estimator configs '''
+        self.gait_config = gait.gait_config(gait_init_fn)
 
     # Public methods
     def load_dnn_model(self):
@@ -169,12 +176,14 @@ def count_people(pc):
     global first_frame
     # Go through each camera and count the number of people in them
     for cam_name in pc.all_cams_config.all_cams_name:
+        print(cam_name)
         cam_obj = pc.all_cams_config.cam_config[cam_name]
         valid_image, image = cam_obj.cap_handle.read()
 
         if valid_image:
             ############### GG Expts ############################
             image_copy = image.copy()
+            image_copy2 = image.copy()
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             gray = cv2.GaussianBlur(gray, (21, 21), 0)
             # If first frame not grabbed, please do so now
@@ -250,6 +259,14 @@ def count_people(pc):
                 cv2.namedWindow(cam_name)
                 cv2.moveWindow(cam_name, 0, 580)
                 cv2.imshow(cam_name, pc_utils.resize_half(image))
+                if cam_obj.display_gait:
+                    # Get gaited image
+                    humans = gait.get_humans(pc.gait_config, image_copy2)
+                    gait_image = gait.draw_gait(image_copy, humans)
+                    gait_window = '{}-{}'.format(cam_name, 'gait')
+                    cv2.namedWindow(gait_window)
+                    cv2.moveWindow(gait_window, 1280, 580)
+                    cv2.imshow(gait_window, pc_utils.resize_half(gait_image))
                 cv2.waitKey(1)
 
             # If person(s) have been detected in this image, 
@@ -265,7 +282,7 @@ def count_people(pc):
                     person['msg_format_version'] = pc.msg_format_ver
                     logging.info(person)
                     person_json = json.dumps(dict(person))
-                    send_message(person_json, pc)
+                    # send_message(person_json, pc)
             else:
                 logging.info('No people IDed in image')
         else:

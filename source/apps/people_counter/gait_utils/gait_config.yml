@@ -1,0 +1,7 @@
+defaults:
+    placeholder: placeholder_for_defaults
+
+models:               # Defines the various models that can be used
+    openpose_model: /home/ggopalan/data/models/optimized_openpose.pb
+
+

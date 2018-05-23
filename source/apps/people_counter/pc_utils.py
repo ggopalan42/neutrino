@@ -35,6 +35,7 @@ class single_cam_config():
         self.cam_creds = cam_dict[cam_name]['cam_creds']  ###
         self.display_image = cam_dict[cam_name]['display_image']
         self.display_predictions = cam_dict[cam_name]['display_predictions']
+        self.display_gait = cam_dict[cam_name]['display_gait']
         self.kafka_topic = cam_dict[cam_name]['kafka_topic']
         self.kafka_partition = cam_dict[cam_name]['kafka_partition']  ###
         self.kafka_key = cam_dict[cam_name]['kafka_key']

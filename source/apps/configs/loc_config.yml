@@ -1,0 +1,104 @@
+default_params:
+    kafka_msg_format_ver: 1.0.0
+
+kafka:
+    kafka_broker_hostname: '10.2.13.29'
+    kafka_broker_port: '9092'
+
+ale_params:     # These are the parameters for the Aruba ALE
+    # ale_rem is used while accessing REST or zeromq via remote host
+    ale_rem_hostname: 10.1.3.30
+    ale_rem_port: 7779
+    images_base: ./images
+   
+cams_config:         # Config of camera information
+    cams_config_fn:
+        - aruba_cams.yml  
+
+ml_config:           # Config of various ML parameters
+    obj_det_model_configs:
+        - mobilenet_ssd_v1_fn: mobilenet_ssd_v1.yml
+
+# Aruba Campus info
+# This information was gotten from ALE via the REST interface. Mostly
+# by doing curl commands. Example below:
+#    curl -u admin --insecure https://10.1.3.30/api/v1/access_point
+# This can easily be automated in future
+
+ale_campus_info:
+    - SLR:
+        description: "Aruba's Santa Clara HQ Campus"
+        campus_id: a6e8081396b33633aba6946e6d33339a
+        campus_name: SLR
+        building:
+            - SLR01:
+                  building_id: 418f3c0516fc3ee49ee01a20e00835de
+                  building_name: SLR01
+                  floor:
+                      - floor1:
+                          floor_id: 99e9db7aaea13f07b783cb4650811630
+                          floor_name: "Floor 1"
+                          floor_image: slr01_floor1_99e9db7aaea13f07b783cb4650811630.jpg
+                          floor_dwg_width: 318
+                          floor_dwg_length: 198
+                          floor_dwg_unit: feet
+                      - floor2:
+                          floor_id: 429191a0df4d392c8df9ed35a2ce444d
+                          floor_name: "Floor 2"
+                          floor_image: slr01_floor2_429191a0df4d392c8df9ed35a2ce444d.jpg
+                          floor_dwg_width: 320
+                          floor_dwg_length: 204
+                          floor_dwg_unit: feet
+                      - floor3:
+                          floor_id: 044eba35adb937d9b20f040e1c1cc5cb
+                          floor_name: "Floor 3"
+                          floor_image: slr01_floor3_044eba35adb937d9b20f040e1c1cc5cb.jpg
+                          floor_dwg_width: 303
+                          floor_dwg_length: 194
+                          floor_dwg_unit: feet
+                      - floor5:
+                          floor_id: 46c2266f22de364bbe966b37ed54e5ff
+                          floor_name: "Floor 5"
+                          floor_image: slr01_floor5_46c2266f22de364bbe966b37ed54e5ff.jpg
+                          floor_dwg_width: 306
+                          floor_dwg_length: 195
+                          floor_dwg_unit: feet
+            - SLR01-4:
+                  building_id: 5f971b484a0539579569ba33ab90a5ca
+                  building_name: SLR01-4
+                  floor:
+                      - floor4:
+                          floor_id: 2ce68fbe28a4335b9c7819b227c701b9
+                          floor_name: "Floor 4"
+                          floor_image: slr01-4_floor4_2ce68fbe28a4335b9c7819b227c701b9.jpg
+                          floor_dwg_width: 303
+                          floor_dwg_length: 194
+                          floor_dwg_unit: feet
+            - SLR02:
+                  building_id: b92c620812a638fc9741bf39129b05a2
+                  building_name: SLR02
+                  floor:
+                      - floor1:
+                          floor_id: c56f383aaf5e3b61a428d9467e0231d3
+                          floor_name: "Floor 1"
+                          floor_image: slr02_floor1_c56f383aaf5e3b61a428d9467e0231d3.jpg
+                          floor_dwg_width: 324
+                          floor_dwg_length: 137
+                          floor_dwg_unit: feet
+
+    - Portland:
+        description: "Aruba's Portland Campus"
+        campus_id: 416d1f0790b0349da626df97944f9ac5
+        campus_name: "Portland, OR"
+        building:
+            - BLOCK_300:
+                  building_id: e6e596e653dd3181bfe50342225f8a0f
+                  building_name: "BLOCK 300"
+                  floor:
+                      - floor7:
+                          floor_id: 26048610bae2353a9581332c5c5790a0
+                          floor_name: "Floor 7"
+                          floor_image: PORblock300_floor1_26048610bae2353a9581332c5c5790a0.jpg
+                          floor_dwg_width: 214
+                          floor_dwg_length: 218
+                          floor_dwg_unit: feet

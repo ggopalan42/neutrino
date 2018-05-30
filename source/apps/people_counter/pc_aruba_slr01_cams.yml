@@ -44,16 +44,17 @@ cams:
         cam_hostname: 192.168.128.18
         cam_uri: axis-cgi/mjpg/video.cgi
         cam_creds: aruba_axis1
-        # read_from_file: slr01_bldg_d_f1_elevators_save1.mjpg
+        # read_from_file: /home/ggopalan/data/videos/aruba_cams/slr01_bldg_d_f1_elevators_lt1.mjpg
         # write_to_file: vid1.mjpg
         display_image: True
         display_predictions: True
+        display_gait: True
         kafka_topic: aruba_slr01_people_counter1
         kafka_partition: 1      # Or None if topic# need not be assigned
         kafka_key: slr01_bldg_d_f1_elevators 
 
     - slr01_bldg_d_f1_rear_lobby_entrance:
-        valid: True
+        valid: False
         display_name: Aruba SLR01 Bldg D Floor 1 Rear Lobby Entrance
         description: "Aruba, Santa Clara Campus, Main Building, Floor 1, Rear Lobby Entrance (Next to CEC Entrance)"
         cam_type: axis_vapix_P3364
@@ -61,10 +62,11 @@ cams:
         cam_hostname: 192.168.128.17
         cam_uri: axis-cgi/mjpg/video.cgi
         cam_creds: aruba_axis1
-        # read_from_file: slr01_bldg_d_f1_rear_lobby_entrance_save1.mjpg
+        read_from_file: slr01_bldg_d_f1_rear_lobby_entrance_lt1.mjpg
         # write_to_file: vid2.mjpg
         display_image: True
         display_predictions: True
+        display_gait: True
         kafka_topic: aruba_slr01_people_counter1
         kafka_partition: 4      # Or None if topic# need not be assigned
         kafka_key: slr01_bldg_d_f1_elevators 

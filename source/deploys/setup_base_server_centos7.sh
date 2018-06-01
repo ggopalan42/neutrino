@@ -69,6 +69,7 @@ function install_python_packages {
     echo "$(tput setaf 2) Installing python packages in $NPY3_VENV_NAME $(tput sgr 0)"
     # Switch to the appropriate env
     source /opt/neutrino/venvs/$NPY3_VENV_NAME/bin/activate
+    pwd
     pip install -r requirements_centos7.txt 
 }
 
@@ -88,7 +89,7 @@ echo "$(tput setaf 2) Setup bash aliases, including activation of venv $(tput sg
 #  touch $HOME/.bash_aliases
 # fi
 # Add needed aliases to bashrc file and source it
-cat <<EOT >> .bashrc
+cat <<EOT >> ~/.bashrc
 
 alias src='source /home/ggopalan/.bashrc'
 alias tailf='tail -f'

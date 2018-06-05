@@ -1,0 +1,10 @@
+ml_models:            # List of model configs to load
+    # Currently all model config files are located in the default location of
+    #i ..../apps/configs.
+    - mobilenet_ssd_v1.yml
+
+# Below is list of models for which the neural network and weights are to 
+# be loaded. Note that the list below has to match the "model_name" attribute
+# in the corresponding ml model config yml file
+model_weights_to_load:
+    - MobilenetSSD_V1

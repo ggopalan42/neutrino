@@ -1,0 +1,6 @@
+default_params:
+    kafka_msg_format_ver: 1.0.0
+
+kafka:
+    kafka_broker_hostname: '10.2.13.29'
+    kafka_broker_port: '9092'

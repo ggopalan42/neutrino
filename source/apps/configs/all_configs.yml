@@ -1,0 +1,10 @@
+configs_list:            # All of the config files
+    # Format is: config_type: filename.yml
+    ml_models: list_of_mlmodels.yml
+    cams:      list_of_cams.yml
+    locs:      list_of_locs.yml
+
+    kafka:     kafka_config.yml
+    cassandra: cassandra_config.yml
+
+    

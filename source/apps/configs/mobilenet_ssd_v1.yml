@@ -1,7 +1,6 @@
 model:
-    model_name: MobileNetSSD_V1
-    model_description: TBD
-    model_framework: caffe
+    model_name: MobilenetSSD_V1
+    model_description: "Google's Mobile Net SSD V1"
     # By default all models are stored in .../apps/models dir. Currently
     # this is not configurable
     model_file: MobileNetSSD_deploy.caffemodel      # Model file

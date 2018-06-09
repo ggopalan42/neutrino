@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 ''' Utilities for People Counter application '''
 
-import sys
-import logging
-
+import cv2
 import numpy as np
 
 def resize_half(image):

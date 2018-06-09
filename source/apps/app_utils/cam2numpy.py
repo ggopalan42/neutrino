@@ -83,7 +83,7 @@ def read_n_write_frames(cap_handle, filename, nframes = NUM_FRAMES_TO_WRITE):
             # Doing the (t1-t0)/8 to fit the time delta between frames into a uint8. Need to find a better method
             tmp_array = np.array([NPY_FILE_FORMAT, np.uint8((t1-t0)/10)], dtype=np.uint8)
             single_img_array = np.append(tmp_array, image_flat)
-            np_images[0] = single_img_array
+            np_images[i] = single_img_array
             logging.info('Added image {} to numpy array'.format(i))
         else:
             raise RuntimeError('Valid image not read from camera. Exiting')

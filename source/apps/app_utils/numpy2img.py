@@ -35,7 +35,9 @@ logging.getLogger('kafka').setLevel(logging.WARNING)
 
 # Constants
 WRITE_FN_BASE = os.path.join(os.path.expanduser("~"), 'archimedes_cam_{}.npy')
-NP_IMAGES_FN = os.path.join('/home/ggopalan/projects/apps/people_counter/video_save', 'archimedes_cam_1528507250.npy')
+NP_IMAGES_BASE = '/home/ggopalan/projects/apps/people_counter/video_save'
+NP_IMAGES_FN = 'archimedes_cam_1528741516.npy'
+NP_IMAGES_FULL_FN = os.path.join(NP_IMAGES_BASE, NP_IMAGES_FN)
 
 FPS = 10
 FRAME_HEIGHT = 1536
@@ -79,7 +81,7 @@ def read_n_show_frames(images_array):
                                                 .format(format_img_array[0]))
 
 def main():
-    images_array = read_numpy_file(NP_IMAGES_FN)
+    images_array = read_numpy_file(NP_IMAGES_FULL_FN)
     read_n_show_frames(images_array)
 
 if __name__ == '__main__':

@@ -3,7 +3,8 @@
     in the image and feed the results to kafka '''
 
 # Python lib imports
-import argparse
+import cv2
+import base64
 import os
 import sys
 import yaml
@@ -26,6 +27,20 @@ from urllib.parse import urlparse
 logging.basicConfig(level=logging.INFO)
 # Set kafka module level higher. It spews a lot of junk
 logging.getLogger('kafka').setLevel(logging.WARNING)
+
+class mobilenetssd_v1():
+    ''' MoblenetSSD V1 model parameters '''
+    def __init__(self, models_path, mlmodel_dict):
+        self.model_file = os.path.join(models_path, mlmodel_dict['model_file'])
+        self.prototxt_file = os.path.join(models_path, 
+                                                 mlmodel_dict['prototxt_file'])
+        self.classes = mlmodel_dict['model_params']['object_classes'].split()
+        self.min_confidence = mlmodel_dict['model_params']['confidence']
+        self.colors = np.random.uniform(0, 255, size=(len(self.classes), 3)) 
+        # previous_det is a stupid hack. I have not figured out a way around
+        self.previous_det = np.array([[[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]]])
+        # Below is needed for person identification purposes only
+        self.person_idx = self.classes.index('person')
 
 class single_cam_config():
     ''' Object that holds the config and methods of one camera '''
@@ -140,19 +155,12 @@ class all_cams_config():
                 cam_obj = single_cam_config(cam, self.default_creds)
                 self.cam_config[cam_name] = cam_obj
 
-class mobilenetssd_v1():
-    ''' MoblenetSSD V1 model parameters '''
-    def __init__(self, models_path, mlmodel_dict):
-        self.model_file = os.path.join(models_path, mlmodel_dict['model_file'])
-        self.prototxt_file = os.path.join(models_path, 
-                                                 mlmodel_dict['prototxt_file'])
-        self.classes = mlmodel_dict['model_params']['object_classes'].split()
-        self.min_confidence = mlmodel_dict['model_params']['confidence']
-        self.colors = np.random.uniform(0, 255, size=(len(self.classes), 3)) 
-        # previous_det is a stupid hack. I have not figured out a way around
-        self.previous_det = np.array([[[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]]])
-        # Below is needed for person identification purposes only
-        self.person_idx = self.classes.index('person')
+class kafka_config_class():
+    ''' Kafka config object '''
+    def __init__(self, kafka_cfg_dict):
+        self.kafka_msg_format_ver = kafka_cfg_dict['default_params']['kafka_msg_format_ver']
+        self.kafka_broker_hostname = kafka_cfg_dict['kafka']['kafka_broker_hostname']
+        self.kafka_broker_port = kafka_cfg_dict['kafka']['kafka_broker_port']
 
 class config_obj():
     def __init__(self, args):
@@ -174,8 +182,6 @@ class config_obj():
         self._set_some_paths()
         self._load_all_configs(args)
         
-        # self.msg_format_ver = '1.0.0'
-
     # Private methods
     def _load_mlmodels_configs(self, cfg_fn):
         ''' Go through the list of ml models specified and load them '''
@@ -192,11 +198,11 @@ class config_obj():
             model_name = mlmodel_dict['model_name']
             try:
                 # Init the ml object
-                model_config_class = self.ml_models_class_dict[model_name](
+                model_config_obj = self.ml_models_class_dict[model_name](
                                                self.models_path, mlmodel_dict)
-                # Set the inited object as an attribete to this class. 
+                # Set the inited object as an attribute to this class. 
                 # The attribute is the name of the ml model specified in file
-                setattr(self, model_name, model_config_class)
+                setattr(self, model_name, model_config_obj)
             except KeyError:
                 logging.error('Class to load model named {} not implemented'
                                            .format(model_name))
@@ -206,15 +212,40 @@ class config_obj():
         self.model_weights_to_load = mlmodels_dict['model_weights_to_load']
 
     def _load_cams_configs(self, cfg_fn):
-        ''' Go through the list of cam config files specified and process them '''
-        print('Doing dis!')
+        ''' Go through the list of cam config files specified and 
+            process them '''
+        logging.info('Loading list of camera configs from file: {}'
+                                                            .format(cfg_fn))
+        cams_list_fn = os.path.join(self.configs_path, cfg_fn)
+        self.list_of_cams = []
+        with open(cams_list_fn) as fh:
+            cams_list_dict = yaml.load(fh)
+        for cam_cfg_fn in cams_list_dict['cams_list']:
+            logging.info('Loading cam config from {}'.format(cam_cfg_fn))
+            cam_cfg_full_fn = os.path.join(self.configs_path, cam_cfg_fn)
+            with open(cam_cfg_full_fn) as fh:
+                cams_cfg_dict = yaml.load(fh)
+            cams_name = cams_cfg_dict['cams_name']
+            cams_config_obj = all_cams_config(cams_cfg_dict)
+            # Set the inited object as an attribute to this class. 
+            # The attribute is the name of the cams specified in file
+            setattr(self, cams_name, cams_config_obj)
+            # Add the name of the cams if all of above successful
+            self.list_of_cams.append(cams_name)
 
     def _load_locs_configs(self, cfg_fn):
         logging.warning('Bypassing location config load for now')
+
     def _load_kafka_config(self, cfg_fn):
-        print(sys._getframe().f_code.co_name, cfg_fn)
+        ''' Load kafka config from specified file '''
+        logging.info('Loading kafka config from file: {}'.format(cfg_fn))
+        kafka_cfg_fn = os.path.join(self.configs_path, cfg_fn)
+        with open(kafka_cfg_fn) as fh:
+            kafka_cfg_dict = yaml.load(fh)
+        self.kafka_config = kafka_config_class(kafka_cfg_dict)
+
     def _load_cassandra_config(self, cfg_fn):
-        print(sys._getframe().f_code.co_name, cfg_fn)
+        logging.warning('Bypassing cassandra config load for now')
 
     def _set_some_paths(self):
         ''' Set some default paths and filenames '''
@@ -235,8 +266,11 @@ class config_obj():
     # Public methods
     def load_dnn_model(self):
         ''' Load a model and weights. Currently hard coded to MobileNet SSD '''
-        logging.info('Loading model: {}'.format(self.model_file))
-        self.net = cv2.dnn.readNetFromCaffe(self.prototxt_file, self.model_file)
+        for load_model in self.model_weights_to_load:
+            logging.info('Loading net and weights for model: {}'.format(load_model))
+            model_obj = getattr(self, load_model)
+            model_obj.net = cv2.dnn.readNetFromCaffe(model_obj.prototxt_file, 
+                                                        model_obj.model_file)
 
     def connect_all_cams(self):
         ''' Connect to all specified cameras '''

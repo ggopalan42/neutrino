@@ -3,16 +3,17 @@
 
 import sys
 import cv2
+import time
 import logging
 
 import numpy as np
 
-def process_detections(pi_obj, image, detections, display_predictions = False):
+def process_detections(model_obj, image, detections, display_predictions = False):
     ''' Go over each object detected and if its a person, return the
         (x,y) locations '''
 
     person_list = []
-    min_conf = pi_obj.confidence
+    min_conf = model_obj.min_confidence
     (h, w) = image.shape[:2]
 
     # loop over the detections
@@ -32,8 +33,8 @@ def process_detections(pi_obj, image, detections, display_predictions = False):
                 (startX, startY, endX, endY) = box.astype("int")
 
                 # Process detection if its a person
-                if idx == pi_obj.person_idx:
-                    label = "{}".format(pi_obj.classes[idx])
+                if idx == model_obj.person_idx:
+                    label = "{}".format(model_obj.classes[idx])
                     person_info = {  
                         'found'      : label, 
                         'confidence' : float(confidence),
@@ -46,47 +47,48 @@ def process_detections(pi_obj, image, detections, display_predictions = False):
                 # If requested to superimpose ided objects to image, do it
                 if display_predictions:
                     # display the prediction
-                    label = "{}: {:.2f}%".format(pi_obj.classes[idx],
+                    label = "{}: {:.2f}%".format(model_obj.classes[idx],
                                                                confidence*100)
                     logging.info("Found {}".format(label))
                     cv2.rectangle(image, (startX, startY), (endX, endY),
-                                                        pi_obj.colors[idx], 2)
+                                                        model_obj.colors[idx], 2)
                     y = startY - 15 if startY - 15 > 15 else startY + 15
                     cv2.putText(image, label, (startX, y),
-                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, pi_obj.colors[idx], 2)
+                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, model_obj.colors[idx], 2)
 
     return person_list
 
 
-def id_people(pi_obj, image, display_predictions = False):
+def id_people(co, image, model_to_use = 'MobilenetSSD_V1', display_predictions = False):
     ''' Load the image and id any people in it '''
-    # (h, w) = image.shape[:2]
+    # get the model object
+    model_obj = getattr(co, model_to_use)
     # Construct an input blob for the image
     # by resizing to a fixed 300x300 pixels and then normalizing it
     # (note: normalization is done via the authors of the MobileNet SSD
     # implementation)
-    start_t = default_timer()
+    start_t = time.time()
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)),
                                              0.007843, (300, 300), 127.5)
     # pass the blob through the network and obtain the detections and
     # predictions
     logging.info("Computing object detections...")
-    pi_obj.net.setInput(blob)
-    detections = pi_obj.net.forward()
+    model_obj.net.setInput(blob)
+    detections = model_obj.net.forward()
 
     # This is a stupid hack. For some reason, net.forward returns previously 
     # detected objects if image is a blank image. Don't know why. Fix later
-    if np.array_equal(detections, pi_obj.previous_det):
+    if np.array_equal(detections, model_obj.previous_det):
         logging.info('No image found. IDed in {} seconds'
-                                        .format(int(default_timer()-start_t)))
+                                        .format(int(time.time()-start_t)))
         # Return an empty list in this case
         return []
     else:
-        pi_obj.previous_det = detections
-        ided_persons = process_detections(pi_obj, image, detections,
+        model_obj.previous_det = detections
+        ided_persons = process_detections(model_obj, image, detections,
                                                           display_predictions)
         logging.info('Imaged IDed in {} seconds'
-                                        .format(int(default_timer()-start_t)))
+                                        .format(int(time.time()-start_t)))
         return ided_persons
 
  

@@ -102,12 +102,12 @@ if __name__ == '__main__':
     cc = all_cams_config(cam_config_yaml)
     for cam in cc.all_cams_name:
         cam_obj = cc.cam_config[cam]
-        print(cam_obj.cam_name, cam_obj.cam_user)
-        print(cam_obj.cam_url)
+        logging.info(cam_obj.cam_name, cam_obj.cam_user)
+        logging.info(cam_obj.cam_url)
 
     with open(PC_CONFIG_YAML_FILE) as pcfh:
         pc_config_yaml = yaml.load(pcfh)
 
     pcc = pc_config(pc_config_yaml)
-    print(pcc.confidence)
+    logging.info(pcc.confidence)
 

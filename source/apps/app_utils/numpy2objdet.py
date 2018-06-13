@@ -39,8 +39,8 @@ logging.getLogger('kafka').setLevel(logging.WARNING)
 
 # Constants
 WRITE_FN_BASE = os.path.join(os.path.expanduser("~"), 'archimedes_cam_{}.npy')
-NP_IMAGES_BASE = '/home/ggopalan/projects/apps/people_counter/video_save'
-NP_IMAGES_FN = 'archimedes_cam_1528741516.npy'
+NP_IMAGES_BASE = '/home/ggopalan/data/videos/aruba_cams/conf_rooms/archimedes/0612'
+NP_IMAGES_FN = 'archimedes_cam_1528817373.npy'
 NP_IMAGES_GLOB = '*.npy'
 NP_IMAGES_FULL_FN = os.path.join(NP_IMAGES_BASE, NP_IMAGES_FN)
 NP_IMAGES_FULL_GLOB = os.path.join(NP_IMAGES_BASE, NP_IMAGES_GLOB)
@@ -80,7 +80,7 @@ def read_numpy_file(filename):
     read_images = np.load(filename)
     return read_images
 
-def cleanup(cap_handle):
+def cleanup():
     cv2.destroyAllWindows()
     
 def show_image_f1(co, format_img_array):
@@ -94,7 +94,7 @@ def show_image_f1(co, format_img_array):
     # Now id any persons in it
     ided_persons = obj_nn.id_people(co, image, display_predictions = True)
     if len(ided_persons) > 0:
-        print('IDed persons: {}'.format(ided_persons))
+        logging.info('IDed persons: {}'.format(ided_persons))
     cv2.imshow('Archimedes', image_utils.resize_half(image))
     cv2.waitKey(1)
     logging.info('Sleeping for inter frame delay of {} secs'
@@ -117,8 +117,8 @@ def read_n_show_frames(co, images_array):
 def main_loop(co):
     
     glob_files = glob.glob(NP_IMAGES_FULL_GLOB)
-    for np_images_fn in sorted(glob_files):
-    # for np_images_fn in [NP_IMAGES_FULL_FN]:
+    # for np_images_fn in sorted(glob_files):
+    for np_images_fn in [NP_IMAGES_FULL_FN]:
         logging.info('Showing from file: {}'.format(np_images_fn))
         images_array = read_numpy_file(np_images_fn)
         read_n_show_frames(co, images_array)

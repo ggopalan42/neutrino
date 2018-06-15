@@ -1,0 +1,182 @@
+cams_name: aruba_cams
+
+defaults:
+    creds:
+        aruba_axis1:     # The 1 here simply there if we needed more def creds
+            user: root
+            pw: 'cm9vdA=='
+            # The "enc_type" here is more obfscutaion type. pw cannot truly
+            # be "hidden" unless the application (Axis cameras here) support
+            # some type of auth. I have not found any so far
+            enc_type: base64
+
+# Cams fields explained:
+#   - cam_name:    -> Name of camera. Internal use and may appear in logs
+#       valid:         -> If set, this entire cam config is valid and
+#                         will be processed
+#       display_name:  -> Name displayed when showing images. 
+#                         Either in cv2.imshow or on web interface
+#       description:   -> A full, wordy description of the camera
+#       cam_type:      -> Currently supported cam types:
+#                            1) axis_vapix_P3364
+#       cam_proto:     -> proto to be used (http, https, etc) 
+#       cam_hostname:  -> Hostname or IP addr 
+#       cam_uri:       -> URI used to access video of the cam
+#       cam_creds:     -> If using default creds, specify from default list
+#       write_to_file: -> If set, will also write to file
+#       read_from_file: -> If set, will read from file instead of from cam
+#       display_image:  -> If set, will show the image with a cv2.imshow
+#       display_predictions -> If set, will draw a box around the detected obj
+#                              and name it with prediction confidence level
+#       kafka_topic:    -> Self explanatory
+#       kafka_partition: -> Self explanatory
+#       kafka_key:       -> Key used when partition not specified
+
+
+cams:
+    - slr01_bldg_d_f1_elevators:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 1 Elevators
+        description: "Aruba, Santa Clara Campus, Main Building, Floor 1, Elevators"
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.18
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        building_id: 418f3c0516fc3ee49ee01a20e00835de
+        floor_id: 99e9db7aaea13f07b783cb4650811630
+        # read_from_file: test2.mp4
+        # read_from_file: video.mjpg
+        # read_from_file: slr01_bldg_d_f1_elevators_lt1.mjpg
+        # write_to_file: vid1.mjpg
+        display_image: True
+        display_predictions: True
+        display_gait: False
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 1      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f1_elevators 
+
+    - slr01_bldg_d_f1_rear_lobby_entrance:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 1 Rear Lobby Entrance
+        description: "Aruba, Santa Clara Campus, Main Building, Floor 1, Rear Lobby Entrance (Next to CEC Entrance)"
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.17
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        building_id: 418f3c0516fc3ee49ee01a20e00835de
+        floor_id: 99e9db7aaea13f07b783cb4650811630
+        read_from_file: slr01_bldg_d_f1_rear_lobby_entrance_lt1.mjpg
+        # write_to_file: vid2.mjpg
+        display_image: True
+        display_predictions: True
+        display_gait: False
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 4      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f1_elevators 
+
+    - slr01_bldg_d_f2_elevators:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 2 Elevators
+        description: "Aruba, Santa Clara Campus, Main Building, Floor 2, Elevators"
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.30
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        building_id: 418f3c0516fc3ee49ee01a20e00835de
+        floor_id: 429191a0df4d392c8df9ed35a2ce444d
+        # read_from_file: None
+        # write_to_file: None
+        display_image: True
+        display_predictions: True
+        display_gait: False
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 10      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f2_elevators 
+
+    # Using this for ALE integration testing
+    - slr01_bldg_d_f3_elevators:
+        valid: True
+        display_name: Aruba SLR01 Bldg D Floor 3 Elevators
+        description: "Aruba, Santa Clara Campus, Main Building, Floor 3, Elevators"
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.34
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        building_id: 418f3c0516fc3ee49ee01a20e00835de
+        floor_id: 044eba35adb937d9b20f040e1c1cc5cb
+        cam_sub_image: "300 1000 300 1100"  # StartX, EndX, StartY, EndY
+        # read_from_file: loc_corr_f3_elevators_cam_r1.mjpg
+        # write_to_file: loc_corr_f3_elevators_cam_r1.mjpg
+        display_image: True
+        display_predictions: True
+        display_gait: False
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 10      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f3_elevators 
+
+    - slr01_bldg_d_f4_elevators:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 4 Elevators
+        description: "Aruba, Santa Clara Campus, Main Building, Floor 4, Elevators"
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.42
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        building_id: 5f971b484a0539579569ba33ab90a5ca
+        floor_id: 2ce68fbe28a4335b9c7819b227c701b9
+        cam_sub_image: "300 1000 300 1100"  # StartX, EndX, StartY, EndY
+        # read_from_file: None
+        # write_to_file: None
+        display_image: True
+        display_predictions: True
+        display_gait: False
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 10      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f3_elevators 
+
+    - slr01_bldg_d_f5_elevators:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 5 Elevators
+        description: "Aruba, Santa Clara Campus, Main Building, Floor 5, Elevators"
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.47
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        building_id: 418f3c0516fc3ee49ee01a20e00835de
+        floor_id: 46c2266f22de364bbe966b37ed54e5ff
+        cam_sub_image: "300 1000 300 1100"  # StartX, EndX, StartY, EndY
+        # read_from_file: None
+        # write_to_file: None
+        display_image: True
+        display_predictions: True
+        display_gait: False
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 10      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f3_elevators 
+
+    - slr01_bldg_c_f1_s_lobby_rnd:
+        valid: False
+        display_name: Aruba SLR01 Bldg C Floor 1 S Lobby to R&D
+        description: "Aruba, Santa Clara Campus, Building C, Floor 1, South Common Lobby from R&D"
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.53
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        building_id: b92c620812a638fc9741bf39129b05a2
+        floor_id: c56f383aaf5e3b61a428d9467e0231d3
+        cam_sub_image: "300 1000 300 1100"  # StartX, EndX, StartY, EndY
+        # read_from_file: None
+        # write_to_file: None
+        display_image: True
+        display_predictions: True
+        display_gait: False
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 10      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f3_elevators 

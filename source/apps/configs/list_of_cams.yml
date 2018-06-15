@@ -1,0 +1,4 @@
+cams_list:            # List of cam filenames to load
+    # Currently all cams files are located in the default location of
+    #i ..../apps/configs. Currently this is not configurable
+    - aruba_cams.yml

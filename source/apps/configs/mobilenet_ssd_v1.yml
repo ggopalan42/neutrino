@@ -1,0 +1,16 @@
+model:
+    model_name: MobilenetSSD_V1
+    model_description: "Google's Mobile Net SSD V1"
+    # By default all models are stored in .../apps/models dir. Currently
+    # this is not configurable
+    model_file: MobileNetSSD_deploy.caffemodel      # Model file
+    prototxt_file: MobileNetSSD_deploy.prototxt.txt # Weights file
+    object_filter:
+        - person
+
+    model_params:
+        object_classes: "background  aeroplane bicycle bird boat bottle bus \
+                        car cat chair cow diningtable dog horse motorbike \
+                        person pottedplant sheep sofa train tvmonitor"
+        confidence: 0.2 
+        

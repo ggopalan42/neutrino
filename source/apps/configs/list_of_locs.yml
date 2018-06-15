@@ -1,0 +1,4 @@
+cams_list:            # List of location configs
+    # Currently all loc config files are located in the default location of
+    #i ..../apps/configs. Currently this is not configurable
+    - aruba_locs.yml

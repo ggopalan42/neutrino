@@ -1,6 +1,14 @@
 default_params:
     kafka_msg_format_ver: 1.0.0
 
-kafka:
-    kafka_broker_hostname: '10.2.13.29'
-    kafka_broker_port: '9092'
+kafka_brokers:
+    broker1:
+        broker_hostname: '10.2.13.29'
+        broker_port: '9092'
+
+app_broker_map:   # the map is for the format: application: broker_name
+    room_occ: broker1
+
+app_topic_map:   # the map is for the format: application: topic_name
+    room_occ: roomocc1
+

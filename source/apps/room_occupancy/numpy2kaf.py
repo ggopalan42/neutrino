@@ -1,6 +1,11 @@
 #! /usr/bin/env python
-''' Given a numpy saved file, read it, adjust frames for time delay and
-    display it '''
+''' Given a numpy format saved file, do the following:
+      1. read each row and un-flatten it
+      2. Process each frame for objects detected
+      3. Send detected person message to kafka
+      4. Display frame if asked for
+   Note: This numpy file situatiuon is a temporary situation. Later straight
+         cam to kaf will be done '''
 
 # Python lib imports
 from __future__ import print_function
@@ -10,6 +15,7 @@ import os
 import glob
 import sys
 import time
+import json
 import argparse
 import logging
 
@@ -39,7 +45,7 @@ logging.getLogger('kafka').setLevel(logging.WARNING)
 
 # Constants
 WRITE_FN_BASE = os.path.join(os.path.expanduser("~"), 'archimedes_cam_{}.npy')
-NP_IMAGES_BASE = '/home/ggopalan/data/videos/aruba_cams/conf_rooms/archimedes/0613'
+NP_IMAGES_BASE = '/home/ggopalan/data/videos/aruba_cams/conf_rooms/archimedes/0612'
 NP_IMAGES_FN = 'archimedes_cam_1528817373.npy'
 NP_IMAGES_GLOB = '*.npy'
 NP_IMAGES_FULL_FN = os.path.join(NP_IMAGES_BASE, NP_IMAGES_FN)
@@ -54,6 +60,10 @@ CAM_URL = 'something.com/api/bmp'
 CAM_NUM = 0
 
 NPY_FILE_FORMAT = 1
+
+APP_NAME = 'room_occ'    # Used to get topic from kafka config file
+STREAM_NAME = 'archimedes_conf_cam1'    # In theory this should be in a
+                                        # config file
 
 def parse_args():
     ''' Parse the arguments and return a dict '''
@@ -80,21 +90,40 @@ def read_numpy_file(filename):
     read_images = np.load(filename)
     return read_images
 
-def cleanup():
+def cleanup(co):
+    # Cleanup cv2 windows
     cv2.destroyAllWindows()
-    
+    # cleanup kafka
+    kc = getattr(co.kafka_config, APP_NAME)
+    kc.close_connection()
+
 def show_image_f1(co, format_img_array):
-    # The time delta between frames has been converted to uint8 using (t0 - t1)/10. This will
-    # convert it back to seconds
+    # The time delta between frames has been converted to 
+    # uint8 using (t0 - t1)/10. This will convert it back to seconds
     inter_frame_delta = format_img_array[1] / 100.0 
     flat_image = format_img_array[2:]
     # get the image from the flat array
     image = flat_image.reshape((FRAME_HEIGHT, FRAME_WIDTH, 3))
 
+    # Get the kafka config so messages can be sent
+    kc = getattr(co.kafka_config, APP_NAME)
     # Now id any persons in it
-    ided_persons = obj_nn.id_people(co, image, display_predictions = False)
+    ided_persons = obj_nn.id_people(co, image, display_predictions = True)
     if len(ided_persons) > 0:
-        logging.info('IDed persons: {}'.format(ided_persons))
+        logging.info('Identified {} persons in frame'
+                                                .format(len(ided_persons)))
+        # Go through all id-ed persons, add a few more bits
+        # of info and send it to kafka
+        for person in ided_persons:
+            timenow_usecs = int(time.time() * 10e6)
+            person['detect_time'] = timenow_usecs
+            person['stream_name'] = STREAM_NAME
+            person['msg_format_version'] = kc.kafka_msg_fmt
+            person_json = json.dumps(dict(person))
+            kc.send_message(person_json)
+    else:
+        logging.info('No people IDed in image')
+
     '''
     cv2.imshow('Archimedes', image_utils.resize_half(image))
     cv2.waitKey(1)
@@ -117,10 +146,9 @@ def read_n_show_frames(co, images_array):
                                                 .format(format_img_array[0]))
 
 def main_loop(co):
-    
     glob_files = glob.glob(NP_IMAGES_FULL_GLOB)
-    for np_images_fn in sorted(glob_files):
-    # for np_images_fn in [NP_IMAGES_FULL_FN]:
+    # for np_images_fn in sorted(glob_files):
+    for np_images_fn in [NP_IMAGES_FULL_FN]:
         logging.info('Showing from file: {}'.format(np_images_fn))
         images_array = read_numpy_file(np_images_fn)
         read_n_show_frames(co, images_array)
@@ -130,7 +158,8 @@ if __name__ == '__main__':
     co = lc.config_obj(args)
     # Load our serialized model from disk (this can be part of init itself)
     co.load_dnn_model()
+    # Setup kafka and also connect to the brokers
+    co.get_kafka_app_obj(APP_NAME)
     # Do the main loop
     main_loop(co)
-    cleanup()
-
+    cleanup(co)

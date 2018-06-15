@@ -158,9 +158,47 @@ class all_cams_config():
 class kafka_config_class():
     ''' Kafka config object '''
     def __init__(self, kafka_cfg_dict):
-        self.kafka_msg_format_ver = kafka_cfg_dict['default_params']['kafka_msg_format_ver']
-        self.kafka_broker_hostname = kafka_cfg_dict['kafka']['kafka_broker_hostname']
-        self.kafka_broker_port = kafka_cfg_dict['kafka']['kafka_broker_port']
+        self.kafka_msg_format_ver = kafka_cfg_dict['default_params']  \
+                                                     ['kafka_msg_format_ver']
+        self.kafka_brokers = kafka_cfg_dict['kafka_brokers']
+        self.app_topic_map = kafka_cfg_dict['app_topic_map']
+        self.app_broker_map = kafka_cfg_dict['app_broker_map']
+
+class kafka_app_obj():
+    ''' Kafka object that can be instantiated per app '''
+    def __init__(self, kafka_app_dict, connect_to_broker = True):
+        self.kafka_broker = kafka_app_dict['kafka_broker']
+        self.kafka_port = kafka_app_dict['kafka_port']
+        self.kafka_topic = kafka_app_dict['kafka_topic']
+        self.kafka_msg_fmt = kafka_app_dict['kafka_msg_fmt']
+        self.kafka_partition = 0   # Defaulted for now
+        if connect_to_broker:
+            self.connect2kaf()
+
+    # Public methods
+    def connect2kaf(self):
+        ''' Connect to the kafka broker specified '''
+        logging.info('Connecting to kafka broker: {}'.format(self.kafka_broker)) 
+        self.producer = KafkaProducer(bootstrap_servers= '{}:{}'
+                            .format( self.kafka_broker, self.kafka_port))
+
+    def send_message(self, message):
+        ''' Send message to the broker '''
+        # partition is set to zero for now, but perhaps in the future 
+        # it should also be configured
+        logging.info('Sending to: {}:{}. Message: {}'
+                        .format(self.kafka_broker, self.kafka_topic, message))
+        # For some reason, setting partition to 0 is not working. 
+        # Need to debug more
+        # self.producer.send(self.kafka_topic, message.encode(), self.kafka_partition)
+        self.producer.send(self.kafka_topic, message.encode())
+
+    def close_connection(self):
+        ''' Close the connection to kafka '''
+        # Perhaps this should be a destructor?
+        logging.info('Closing connection to kafka broker: {}'
+                                              .format(self.kafka_broker))
+        self.producer.close()
 
 class config_obj():
     def __init__(self, args):
@@ -259,11 +297,12 @@ class config_obj():
         with open(self.all_configs_fn) as all_fh:
             all_configs_dict = yaml.load(all_fh)
         for cfg_type, cfg_fn in all_configs_dict['configs_list'].items():
-            print('Loading {} config from file'.format(cfg_type, cfg_fn))
+            logging.info('Loading {} config from file'.format(cfg_type, cfg_fn))
             self.load_configs_func_dict[cfg_type](cfg_fn) 
         return
 
     # Public methods
+    # ---------- NN Methods ----------------
     def load_dnn_model(self):
         ''' Load a model and weights. Currently hard coded to MobileNet SSD '''
         for load_model in self.model_weights_to_load:
@@ -272,6 +311,7 @@ class config_obj():
             model_obj.net = cv2.dnn.readNetFromCaffe(model_obj.prototxt_file, 
                                                         model_obj.model_file)
 
+    # ---------- Cam Methods ----------------
     def connect_all_cams(self):
         ''' Connect to all specified cameras '''
         # Go through all cameras and connect to them
@@ -292,11 +332,27 @@ class config_obj():
             cam_obj = self.all_cams_config.cam_config[cam_name]
             cam_obj.cam_release()
 
+    # ---------- Kafka Methods ----------------
+    def get_kafka_app_obj(self, app_name):
+        ''' Given an app name, return a kafka object that is specific to
+            the app '''
+        kafka_app_dict = {}
 
+        # Tmp obj to reduce typing
+        kc = self.kafka_config
+ 
+        # Unfurl the app kafka parameters and init a kafka_app_obj
+        app_broker_name = kc.app_broker_map[app_name]
+        app_broker_dict = kc.kafka_brokers[app_broker_name]
 
-'''
-        # Set camera config
-        with open(cam_yaml_fn) as cfh:
-            cam_config_dict = yaml.load(cfh)
-        self.all_cams_config = pc_utils.all_cams_config(cam_config_dict)
-'''
+        kafka_app_dict['kafka_broker'] = app_broker_dict['broker_hostname']
+        kafka_app_dict['kafka_port'] = app_broker_dict['broker_port']
+        kafka_app_dict['kafka_topic'] = kc.app_topic_map[app_name]
+        kafka_app_dict['kafka_msg_fmt'] = kc.kafka_msg_format_ver
+
+        # Now init the kafka_app_obj and set it as an attribute using the 
+        # app name (Note: This could lead to some insidious bugs if 
+        # app name clashes with any of the "reserved" names on 
+        # self.kafka_config (like, if app name is set to "kafka_brokers"
+        kao =  kafka_app_obj(kafka_app_dict)
+        setattr(kc, app_name, kao)

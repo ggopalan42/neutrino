@@ -246,15 +246,14 @@ if __name__ == '__main__':
     args = parse_args()
     co = lc.config_obj(args)
     print('Dim')
-    print(co.MobilenetSSD_V1.classes)
-    print(co.model_weights_to_load)
+    print(co.kafka_config.kafka_broker_hostname)
     # ------ Connect to camera
-    # pc.connect_all_cams()
+    co.connect_all_cams()
     # ------ load our serialized model from disk (this can be part of init itself)
     # pc.load_dnn_model()
     # ------ Do the main loop
     # main_loop(pc)
     # ------ Do the main loop
-    # pc.release_all_cams()
-    # cleanup()
+    co.release_all_cams()
+    cleanup()
 

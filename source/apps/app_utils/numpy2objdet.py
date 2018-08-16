@@ -40,7 +40,7 @@ logging.getLogger('kafka').setLevel(logging.WARNING)
 # Constants
 WRITE_FN_BASE = os.path.join(os.path.expanduser("~"), 'archimedes_cam_{}.npy')
 NP_IMAGES_BASE = '/home/ggopalan/data/videos/aruba_cams/conf_rooms/archimedes/0613'
-NP_IMAGES_FN = 'archimedes_cam_1528817373.npy'
+NP_IMAGES_FN = 'archimedes_cam_1528912415.npy'
 NP_IMAGES_GLOB = '*.npy'
 NP_IMAGES_FULL_FN = os.path.join(NP_IMAGES_BASE, NP_IMAGES_FN)
 NP_IMAGES_FULL_GLOB = os.path.join(NP_IMAGES_BASE, NP_IMAGES_GLOB)
@@ -92,16 +92,14 @@ def show_image_f1(co, format_img_array):
     image = flat_image.reshape((FRAME_HEIGHT, FRAME_WIDTH, 3))
 
     # Now id any persons in it
-    ided_persons = obj_nn.id_people(co, image, display_predictions = False)
+    ided_persons = obj_nn.id_people(co, image, display_predictions = True)
     if len(ided_persons) > 0:
         logging.info('IDed persons: {}'.format(ided_persons))
-    '''
     cv2.imshow('Archimedes', image_utils.resize_half(image))
     cv2.waitKey(1)
     logging.info('Sleeping for inter frame delay of {} secs'
                                               .format(inter_frame_delta))
-    # time.sleep(inter_frame_delta)
-    '''
+    time.sleep(inter_frame_delta)
     
 def read_n_show_frames(co, images_array):
     ''' Read images from numpy array and show them '''
@@ -119,8 +117,8 @@ def read_n_show_frames(co, images_array):
 def main_loop(co):
     
     glob_files = glob.glob(NP_IMAGES_FULL_GLOB)
-    for np_images_fn in sorted(glob_files):
-    # for np_images_fn in [NP_IMAGES_FULL_FN]:
+    # for np_images_fn in sorted(glob_files):
+    for np_images_fn in [NP_IMAGES_FULL_FN]:
         logging.info('Showing from file: {}'.format(np_images_fn))
         images_array = read_numpy_file(np_images_fn)
         read_n_show_frames(co, images_array)

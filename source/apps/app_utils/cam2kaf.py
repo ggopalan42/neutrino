@@ -24,20 +24,6 @@ from urllib.parse import urlparse
 # import count_people_from_image as cp
 import load_app_configs as lc
 
-# Constamts
-
-# Config files (probably a good idea to move all config files to a single dir)
-CAM_CONFIG_YAML_FILE = './pc_aruba_slr01_cams.yml'
-PC_CONFIG_YAML_FILE = './pc_config.yml'
-GAIT_CONFIG_YAML_FILE = './gait_utils/gait_config.yml'
-
-KAFKA_BROKER = '10.2.13.29'
-KAFKA_PORT = '9092'
-KAFKA_TOPIC = 'peoplecounter1'
-
-
-# Other vars
-
 # Set logging level
 logging.basicConfig(level=logging.INFO)
 # Set kafka module level higher. It spews a lot of junk
@@ -69,6 +55,7 @@ def send_message(message, kf_obj):
     # The .encode is to convert str to bytes (utf-8 is default)
     kf_obj.producer.send(KAFKA_TOPIC, message.encode(), partition = 0)
 
+######### OBSOLETE during next refactor ##############
 def urllib_auth_url(pcu):
     ''' Authenticate a URL with provided username and password '''
     # Get the top level URL - I think this is what needs to be authenticated
@@ -246,6 +233,7 @@ if __name__ == '__main__':
     co = lc.config_obj(args)
     print('Dim')
     print(co.kafka_config.kafka_broker_hostname)
+    sys.exit()
     # ------ Connect to camera
     co.connect_all_cams()
     # ------ load our serialized model from disk (this can be part of init itself)

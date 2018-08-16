@@ -37,7 +37,7 @@ logging.getLogger('kafka').setLevel(logging.WARNING)
 # Constants
 WRITE_FN_BASE = os.path.join(os.path.expanduser("~"), 'archimedes_cam_{}.npy')
 NP_IMAGES_BASE = '/home/ggopalan/projects/apps/people_counter/video_save'
-NP_IMAGES_FN = 'archimedes_cam_1528741516.npy'
+NP_IMAGES_FN = 'archimedes_cam_1528912415.npy'
 NP_IMAGES_GLOB = '*.npy'
 NP_IMAGES_FULL_FN = os.path.join(NP_IMAGES_BASE, NP_IMAGES_FN)
 NP_IMAGES_FULL_GLOB = os.path.join(NP_IMAGES_BASE, NP_IMAGES_GLOB)

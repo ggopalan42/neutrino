@@ -35,7 +35,7 @@ defaults:
 
 cams:
     - slr01_bldg_d_f1_elevators:
-        valid: False
+        valid: True
         display_name: Aruba SLR01 Bldg D Floor 1 Elevators
         description: "Aruba, Santa Clara Campus, Main Building, Floor 1, Elevators"
         cam_type: axis_vapix_P3364
@@ -45,7 +45,7 @@ cams:
         cam_creds: aruba_axis1
         building_id: 418f3c0516fc3ee49ee01a20e00835de
         floor_id: 99e9db7aaea13f07b783cb4650811630
-        # read_from_file: test2.mp4
+        read_from_file: /home/ggopalan/data/videos/aruba_cams/slr01_bldg_d_f1_rear_lobby_entrance_lt1.mjpg
         # read_from_file: video.mjpg
         # read_from_file: slr01_bldg_d_f1_elevators_lt1.mjpg
         # write_to_file: vid1.mjpg
@@ -98,7 +98,7 @@ cams:
 
     # Using this for ALE integration testing
     - slr01_bldg_d_f3_elevators:
-        valid: True
+        valid: False
         display_name: Aruba SLR01 Bldg D Floor 3 Elevators
         description: "Aruba, Santa Clara Campus, Main Building, Floor 3, Elevators"
         cam_type: axis_vapix_P3364
@@ -160,10 +160,10 @@ cams:
         kafka_partition: 10      # Or None if topic# need not be assigned
         kafka_key: slr01_bldg_d_f3_elevators 
 
-    - slr01_bldg_c_f1_s_lobby_rnd:
+    - slr01_bldg_d_f1_s_lobby_rnd:
         valid: False
-        display_name: Aruba SLR01 Bldg C Floor 1 S Lobby to R&D
-        description: "Aruba, Santa Clara Campus, Building C, Floor 1, South Common Lobby from R&D"
+        display_name: Aruba SLR01 Bldg D Floor 1 S Lobby to R&D
+        description: "Aruba, Santa Clara Campus, Building D, Floor 1, South Common Lobby from R&D"
         cam_type: axis_vapix_P3364
         cam_proto: http
         cam_hostname: 192.168.128.53
@@ -180,3 +180,24 @@ cams:
         kafka_topic: aruba_slr01_people_counter1
         kafka_partition: 10      # Or None if topic# need not be assigned
         kafka_key: slr01_bldg_d_f3_elevators 
+
+    - slr01_bldg_d_f4_helpdesk:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 4 Helpdesk
+        description: "Aruba, Santa Clara Campus, Building D, Floor 4, Helpdesk"
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.39
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        building_id: 5f971b484a0539579569ba33ab90a5ca
+        floor_id: 2ce68fbe28a4335b9c7819b227c701b9
+        cam_sub_image: "300 1000 300 1100"  # StartX, EndX, StartY, EndY
+        # read_from_file: None
+        # write_to_file: None
+        display_image: True
+        display_predictions: True
+        display_gait: False
+        kafka_topic: aruba_slr01_people_counter1
+        kafka_partition: 10      # Or None if topic# need not be assigned
+        kafka_key: slr01_bldg_d_f4_helpdesk 

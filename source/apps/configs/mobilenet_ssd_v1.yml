@@ -9,8 +9,9 @@ model:
         - person
 
     model_params:
-        object_classes: "background  aeroplane bicycle bird boat bottle bus \
-                        car cat chair cow diningtable dog horse motorbike \
-                        person pottedplant sheep sofa train tvmonitor"
+        object_classes: "background  aeroplane bicycle bird boat bottle \
+                         bus car cat chair cow diningtable dog horse    \
+                         motorbike person pottedplant sheep sofa train \
+                         tvmonitor"
         confidence: 0.2 
         

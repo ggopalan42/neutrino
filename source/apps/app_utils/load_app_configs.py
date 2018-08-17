@@ -161,8 +161,6 @@ class kafka_config_class():
         self.kafka_msg_format_ver = kafka_cfg_dict['default_params']  \
                                                      ['kafka_msg_format_ver']
         self.kafka_brokers = kafka_cfg_dict['kafka_brokers']
-        self.app_topic_map = kafka_cfg_dict['app_topic_map']
-        self.app_broker_map = kafka_cfg_dict['app_broker_map']
 
 class kafka_app_obj():
     ''' Kafka object that can be instantiated per app '''
@@ -200,6 +198,22 @@ class kafka_app_obj():
                                               .format(self.kafka_broker))
         self.producer.close()
 
+'''
+The config object is (generally) structured as follows:
+
+    config_obj.ml_models_cfg
+    config_obj.cams_cfg
+    config_obj.locs_cfg        # Not implemented currently
+    config_obj.kafka_cfg
+    config_obj.cassandra_cfg   # Not implemented currently
+    config_obj.apps_map
+
+1) config_obj.ml_models_cfg is generally structured as follows:
+     config_obj.ml_models_cfg[model_name1].<model_name1_attrs>
+2) Similarly for config_obj.cams_cfg:
+     config_obj.cams_cfg.[cams_name1].<cams_name1_attrs>
+'''
+
 class config_obj():
     def __init__(self, args):
         # Load configs functions dict
@@ -209,8 +223,13 @@ class config_obj():
                         'locs': self._load_locs_configs,
                         'kafka': self._load_kafka_config,
                         'cassandra': self._load_cassandra_config,
+                        'apps_map': self._load_apps_map,
         }
-        # ml_model init class dict
+        # ml_model init class dict. This is basically map between the
+        # model name and the class name so the class can be instantiated
+        # based on model name. Need to figure out a way to do this
+        # automagically rather than edit source code evry time a new
+        # model is introduced
         self.ml_models_class_dict = {
             'MobilenetSSD_V1': mobilenetssd_v1
         }
@@ -224,6 +243,7 @@ class config_obj():
     def _load_mlmodels_configs(self, cfg_fn):
         ''' Go through the list of ml models specified and load them '''
         logging.info('Loading list of ML models from file: {}'.format(cfg_fn))
+        self.ml_models_cfg = {}
         mlmodels_list_fn = os.path.join(self.configs_path, cfg_fn)
         with open(mlmodels_list_fn) as fh:
             mlmodels_dict = yaml.load(fh)
@@ -246,14 +266,14 @@ class config_obj():
                                            .format(model_name))
                 raise RuntimeError('Class to load model named {} not '
                                            'implemented'.format(model_name))
-        # Now set the list of models whose nets and weights are to be loaded
-        self.model_weights_to_load = mlmodels_dict['model_weights_to_load']
+            self.ml_models_cfg[model_name] = model_config_obj
 
     def _load_cams_configs(self, cfg_fn):
         ''' Go through the list of cam config files specified and 
             process them '''
         logging.info('Loading list of camera configs from file: {}'
                                                             .format(cfg_fn))
+        config_obj.cams_cfg = {}
         cams_list_fn = os.path.join(self.configs_path, cfg_fn)
         self.list_of_cams = []
         with open(cams_list_fn) as fh:
@@ -265,9 +285,7 @@ class config_obj():
                 cams_cfg_dict = yaml.load(fh)
             cams_name = cams_cfg_dict['cams_name']
             cams_config_obj = all_cams_config(cams_cfg_dict)
-            # Set the inited object as an attribute to this class. 
-            # The attribute is the name of the cams specified in file
-            setattr(self, cams_name, cams_config_obj)
+            self.cams_cfg[cams_name] = cams_config_obj
             # Add the name of the cams if all of above successful
             self.list_of_cams.append(cams_name)
 
@@ -280,10 +298,17 @@ class config_obj():
         kafka_cfg_fn = os.path.join(self.configs_path, cfg_fn)
         with open(kafka_cfg_fn) as fh:
             kafka_cfg_dict = yaml.load(fh)
-        self.kafka_config = kafka_config_class(kafka_cfg_dict)
+        self.kafka_cfg = kafka_config_class(kafka_cfg_dict)
 
     def _load_cassandra_config(self, cfg_fn):
         logging.warning('Bypassing cassandra config load for now')
+
+    def _load_apps_map(self, cfg_fn):
+        logging.info('Loading apps map config from file: {}'.format(cfg_fn))
+        apps_map_fn = os.path.join(self.configs_path, cfg_fn)
+        with open(apps_map_fn) as fh:
+            apps_map_cfg = yaml.load(fh)
+        self.apps_map = apps_map_cfg['apps_map']
 
     def _set_some_paths(self):
         ''' Set some default paths and filenames '''
@@ -303,56 +328,75 @@ class config_obj():
 
     # Public methods
     # ---------- NN Methods ----------------
-    def load_dnn_model(self):
-        ''' Load a model and weights. Currently hard coded to MobileNet SSD '''
-        for load_model in self.model_weights_to_load:
-            logging.info('Loading net and weights for model: {}'.format(load_model))
-            model_obj = getattr(self, load_model)
-            model_obj.net = cv2.dnn.readNetFromCaffe(model_obj.prototxt_file, 
+    def load_dnn_model(self, model_name):
+        ''' Load a model and weights. '''
+        logging.info('Loading net and weights for model: {}'.format(model_name))
+        model_obj = self.ml_models_cfg[model_name]
+        model_obj.net = cv2.dnn.readNetFromCaffe(model_obj.prototxt_file, 
                                                         model_obj.model_file)
 
     # ---------- Cam Methods ----------------
-    def connect_all_cams(self):
+    def connect_to_cams(self, cams_name):
         ''' Connect to all specified cameras '''
         # Go through all cameras and connect to them
-        # I know, this for loop can simply be done as: 
-        # for cam_obj in self.all_cams_config.cam_config. 
-        # But wanted to do it in order. 
-        # But again I know, I could have used ordered dict . . .
-        for cam_name in self.all_cams_config.all_cams_name:
-            # logging.info('Connecting to camera: {}'.format(cam_name))
-            cam_obj = self.all_cams_config.cam_config[cam_name]
-            cam_obj.connect_to_cam()
+        # First get the cams config object associated with cams_name 
+        cams_config_obj = self.cams_cfg[cams_name]
+        for cam_name in cams_config_obj.all_cams_name:
+            print(cam_name)
+            logging.info('Connecting to camera: {}'.format(cam_name))
+            single_cam_obj = cams_config_obj.cam_config[cam_name]
+            single_cam_obj.connect_to_cam()
 
-    def release_all_cams(self):
+    def release_all_cams(self, cams_name):
         ''' Release all cameras' resources '''
-        # Go through all cameras and connect to them
-        for cam_name in self.all_cams_config.all_cams_name:
+        # Go through all cameras and release to them
+        cams_config_obj = self.cams_cfg[cams_name]
+        for cam_name in cams_config_obj.all_cams_name:
             logging.info('Releasing camera: {}'.format(cam_name))
-            cam_obj = self.all_cams_config.cam_config[cam_name]
-            cam_obj.cam_release()
+            # get the single cam object
+            single_cam_obj = cams_config_obj.cam_config[cam_name]
+            single_cam_obj.cam_release()
 
     # ---------- Kafka Methods ----------------
-    def get_kafka_app_obj(self, app_name):
+    def set_kafka_app_obj(self, app_name):
         ''' Given an app name, return a kafka object that is specific to
             the app '''
-        kafka_app_dict = {}
 
-        # Tmp obj to reduce typing
-        kc = self.kafka_config
- 
-        # Unfurl the app kafka parameters and init a kafka_app_obj
-        app_broker_name = kc.app_broker_map[app_name]
-        app_broker_dict = kc.kafka_brokers[app_broker_name]
+        kc = self.kafka_cfg
 
-        kafka_app_dict['kafka_broker'] = app_broker_dict['broker_hostname']
-        kafka_app_dict['kafka_port'] = app_broker_dict['broker_port']
-        kafka_app_dict['kafka_topic'] = kc.app_topic_map[app_name]
-        kafka_app_dict['kafka_msg_fmt'] = kc.kafka_msg_format_ver
+        kafka_app_dict = self.get_app_kafka_params(app_name)
+
+        # Get the kafka params (hostname & port basicallY) from app_dict
+        kafka_brokers_dict = self.kafka_cfg.kafka_brokers
+        kafka_broker_params = kafka_brokers_dict[kafka_app_dict['broker']]
+
+        # Now set the kafka_cfg_dict that needs to be passed onto 
+        # The kafka object
+        kafka_cfg_dict = {}
+        kafka_cfg_dict['kafka_broker'] = kafka_broker_params['broker_hostname']
+        kafka_cfg_dict['kafka_port'] = kafka_broker_params['broker_port']
+        kafka_cfg_dict['kafka_topic'] = kafka_app_dict['topic']
+        # Using default message format for now. Its possible that this changes
+        # per app
+        kafka_cfg_dict['kafka_msg_fmt'] = kc.kafka_msg_format_ver
 
         # Now init the kafka_app_obj and set it as an attribute using the 
         # app name (Note: This could lead to some insidious bugs if 
         # app name clashes with any of the "reserved" names on 
-        # self.kafka_config (like, if app name is set to "kafka_brokers"
-        kao =  kafka_app_obj(kafka_app_dict)
+        # self.kafka_cfg (like, if app name is set to "kafka_brokers"
+        kao =  kafka_app_obj(kafka_cfg_dict)
         setattr(kc, app_name, kao)
+
+    # -------------------- App methods ---------------------
+    def get_app_mlmodel(self, app_name):
+        ''' Given an app name, get the ml model name '''
+        return self.apps_map[app_name]['ml_model']
+
+    def get_app_cams_name(self, app_name):
+        ''' Given an app name, return the cams name '''
+        return self.apps_map[app_name]['cams']
+
+    def get_app_kafka_params(self, app_name):
+        ''' Given an app name, return kafka parameters '''
+        return self.apps_map[app_name]['kafka']
+

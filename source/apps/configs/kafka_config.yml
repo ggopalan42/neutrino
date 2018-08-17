@@ -6,9 +6,3 @@ kafka_brokers:
         broker_hostname: '10.2.13.29'
         broker_port: '9092'
 
-app_broker_map:   # the map is for the format: application: broker_name
-    room_occ: broker1
-
-app_topic_map:   # the map is for the format: application: topic_name
-    room_occ: roomocc1
-

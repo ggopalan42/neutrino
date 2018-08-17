@@ -211,7 +211,7 @@ def count_people(pc):
             logging.error('Image read from camera {} failed.(error ret = {}'
                                                 .format(cam_name, valid_image))
 
-def cleanup():
+def cleanup(co):
     ''' Cleanup before exiting '''
     cv2.destroyAllWindows()
     # Should anything be released on kafka and others?
@@ -228,19 +228,28 @@ def main_loop(pc):
         return ['Keyboard Interrupt']
 
 if __name__ == '__main__':
+    # This is for testing
+    APP_NAME = 'helpdesk'
     # Initialize
     args = parse_args()
     co = lc.config_obj(args)
-    print('Dim')
-    print(co.kafka_config.kafka_broker_hostname)
-    sys.exit()
-    # ------ Connect to camera
-    co.connect_all_cams()
-    # ------ load our serialized model from disk (this can be part of init itself)
-    # pc.load_dnn_model()
+
+    # Load ml model parameters
+    ml_model_name = co.get_app_mlmodel(APP_NAME)
+    co.load_dnn_model(ml_model_name)
+
+    # Connect to cams
+    cams_name = co.get_app_cams_name(APP_NAME)
+    # co.connect_to_cams(cams_name)
+
+    # Connect to Kafka
+    # kafka_params_dict = co.get_app_kafka_params(APP_NAME)
+    co.set_kafka_app_obj(APP_NAME)
+    print(co.kafka_cfg)
+
     # ------ Do the main loop
     # main_loop(pc)
     # ------ Do the main loop
-    co.release_all_cams()
-    cleanup()
+    # co.release_all_cams(cams_name)
+    cleanup(co)
 

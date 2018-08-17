@@ -6,5 +6,6 @@ configs_list:            # All of the config files
 
     kafka:     kafka_config.yml
     cassandra: cassandra_config.yml
+    apps_map: apps_map.yml
 
     

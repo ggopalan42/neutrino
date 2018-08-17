@@ -1,0 +1,15 @@
+# This config file maps various apps to the components of config to use
+apps_map:
+    helpdesk:
+        ml_model: MobilenetSSD_V1
+        cams: aruba_cams
+        kafka:
+            broker: broker1
+            topic: peoplecounter1
+    room_occ:
+        ml_model: MobilenetSSD_V1
+        cams: aruba_cams
+        kafka:
+            broker: broker1
+            topic: peoplecounter1
+

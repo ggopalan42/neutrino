@@ -416,7 +416,7 @@ class config_obj():
         return self.apps_map[app_name]['kafka']
 
     # ------------------- Others ------------------------
-    def cleanup(co, cams_name):
+    def cleanup(self, cams_name):
         ''' Cleanup before exiting '''
         cv2.destroyAllWindows()
         self.release_all_cams(cams_name)

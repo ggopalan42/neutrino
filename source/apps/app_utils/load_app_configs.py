@@ -415,3 +415,11 @@ class config_obj():
         ''' Given an app name, return kafka parameters '''
         return self.apps_map[app_name]['kafka']
 
+    # ------------------- Others ------------------------
+    def cleanup(co, cams_name):
+        ''' Cleanup before exiting '''
+        cv2.destroyAllWindows()
+        self.release_all_cams(cams_name)
+        # Should anything be released on kafka 
+        # Any others?
+ 

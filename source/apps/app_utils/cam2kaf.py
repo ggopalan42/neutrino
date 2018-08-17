@@ -23,6 +23,8 @@ from urllib.parse import urlparse
 # Local imports
 # import count_people_from_image as cp
 import load_app_configs as lc
+import image_utils as iu
+import obj_nn_utils as obj_nn
 
 # Set logging level
 logging.basicConfig(level=logging.INFO)
@@ -48,46 +50,6 @@ def parse_args():
             raise RuntimeError('Need to set NEUTRINO_HOME or '
                                'provide it using the -n option') from e
     return args
-
-def send_message(message, kf_obj):
-    ''' Send message to kafka topic '''
-    # print(message)
-    # The .encode is to convert str to bytes (utf-8 is default)
-    kf_obj.producer.send(KAFKA_TOPIC, message.encode(), partition = 0)
-
-######### OBSOLETE during next refactor ##############
-def urllib_auth_url(pcu):
-    ''' Authenticate a URL with provided username and password '''
-    # Get the top level URL - I think this is what needs to be authenticated
-    parsed = urlparse(pcu.url)
-    top_level_url = '{}://{}'.format(parsed.scheme, parsed.netloc)
-    logging.info('Authenticating top level URL: {}'.format(top_level_url))
-
-    # create a password manager
-    password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-
-    # Add the username and password.
-    # If we knew the realm, we could use it instead of None.
-    # top_level_url = "http://example.com/foo/"
-    password_mgr.add_password(None, top_level_url, pcu.username, pcu.password)
-
-    handler = urllib.request.HTTPDigestAuthHandler(password_mgr)
-
-    # create "opener" (OpenerDirector instance)
-    opener = urllib.request.build_opener(handler)
-
-    # use the opener to fetch a URL
-    opener.open(top_level_url)
-
-    # Install the opener.
-    # Now all calls to urllib.request.urlopen use our opener.
-    urllib.request.install_opener(opener)
-
-    # Now set the auth done flag
-    pcu.auth_done = True
-
-def url_to_image(pcu):
-    return pcu.cap_handle.read()
 
 first_frame = None
 def count_people(pc):
@@ -211,24 +173,19 @@ def count_people(pc):
             logging.error('Image read from camera {} failed.(error ret = {}'
                                                 .format(cam_name, valid_image))
 
-def cleanup(co):
-    ''' Cleanup before exiting '''
-    cv2.destroyAllWindows()
-    # Should anything be released on kafka and others?
-
-def main_loop(pc):
+def main_loop(co):
     ''' Continously detect persons and quit on keyboard interrupt '''
     try:
         while True:
-            count_people(pc)
+            cam2kaf(co)
     except KeyboardInterrupt:
         logging.info('Received Ctrl-C. Exiting . . . ')
-        pc.release_all_cams()
-        cleanup()
+        co.cleanup(cams_name)
         return ['Keyboard Interrupt']
 
 if __name__ == '__main__':
     # This is for testing
+    # This can also be used as a tamplate for future apps
     APP_NAME = 'helpdesk'
     # Initialize
     args = parse_args()
@@ -245,11 +202,10 @@ if __name__ == '__main__':
     # Connect to Kafka
     # kafka_params_dict = co.get_app_kafka_params(APP_NAME)
     co.set_kafka_app_obj(APP_NAME)
-    print(co.kafka_cfg)
 
-    # ------ Do the main loop
-    # main_loop(pc)
-    # ------ Do the main loop
-    co.release_all_cams(cams_name)
-    cleanup(co)
+    # Do the main loop
+    main_loop(co)
+
+    # cleanup when done
+    co.cleanup(cams_name)
 

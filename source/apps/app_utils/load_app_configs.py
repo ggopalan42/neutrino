@@ -148,24 +148,24 @@ class single_cam_config():
         ''' Release the camera resources '''
         self.cap_handle.release()
 
-class all_cams_config():
-    ''' This class holds the configs and defaults of all cameras '''
+class cam_grp_config():
+    ''' This class holds the configs and defaults of all camera groups '''
     def __init__(self, cfg_yaml_dict):
         self.cam_config = {}
-        self.all_cams_name = []
-        self.cam_config_dict = cfg_yaml_dict['cams']
+        self.cam_grp_names = []
+        self.cam_grp_config_dict = cfg_yaml_dict['cams']
         # Set all of the default creds
         self.default_creds = cfg_yaml_dict['defaults']['creds']
         # Now setup all of the cams with their params
-        self._setup_all_cam_configs()
+        self._setup_cam_grp_configs()
 
     # Private methods
-    def _setup_all_cam_configs(self):
-        for cam in self.cam_config_dict:
+    def _setup_cam_grp_configs(self):
+        for cam in self.cam_grp_config_dict:
             cam_name = list(cam.keys())[0]
             # Only set single cam configs if valid field is set to True
             if cam[cam_name]['valid']:
-                self.all_cams_name.append(cam_name)
+                self.cam_grp_names.append(cam_name)
                 cam_obj = single_cam_config(cam, self.default_creds)
                 self.cam_config[cam_name] = cam_obj
 
@@ -216,7 +216,7 @@ class kafka_app_obj():
 The config object is (generally) structured as follows:
 
     config_obj.ml_models_cfg
-    config_obj.cams_cfg
+    config_obj.cams_grp_cfg
     config_obj.locs_cfg        # Not implemented currently
     config_obj.kafka_cfg
     config_obj.cassandra_cfg   # Not implemented currently
@@ -224,8 +224,8 @@ The config object is (generally) structured as follows:
 
 1) config_obj.ml_models_cfg is generally structured as follows:
      config_obj.ml_models_cfg.model_name1.<model_name1_attrs>
-2) Similarly for config_obj.cams_cfg:
-     config_obj.cams_cfg.[cams_name1].<cams_name1_attrs>
+2) Similarly for config_obj.cams_grp_cfg:
+     config_obj.cams_grp_cfg.[cams_name1].<cams_name1_attrs>
 '''
 
 class config_obj():
@@ -287,10 +287,11 @@ class config_obj():
             process them '''
         logging.info('Loading list of camera configs from file: {}'
                                                             .format(cfg_fn))
-        self.cams_cfg = cams_config_class()
-        # config_obj.cams_cfg = {}
+        self.cams_grp_cfg = cams_config_class()
+        self.cams_grp_names = []
+
+        # Open the cams list file and get the configs
         cams_list_fn = os.path.join(self.configs_path, cfg_fn)
-        self.list_of_cams = []
         with open(cams_list_fn) as fh:
             cams_list_dict = yaml.load(fh)
         for cam_cfg_fn in cams_list_dict['cams_list']:
@@ -298,11 +299,11 @@ class config_obj():
             cam_cfg_full_fn = os.path.join(self.configs_path, cam_cfg_fn)
             with open(cam_cfg_full_fn) as fh:
                 cams_cfg_dict = yaml.load(fh)
-            cams_name = cams_cfg_dict['cams_name']
-            cams_config_obj = all_cams_config(cams_cfg_dict)
-            setattr(self.cams_cfg, cams_name, cams_config_obj)
+            cams_grp_name = cams_cfg_dict['cams_name']
+            cams_config_obj = cam_grp_config(cams_cfg_dict)
+            setattr(self.cams_grp_cfg, cams_grp_name, cams_config_obj)
             # Add the name of the cams if all of above successful
-            self.list_of_cams.append(cams_name)
+            self.cams_grp_names.append(cams_grp_name)
 
     def _load_locs_configs(self, cfg_fn):
         logging.warning('Bypassing location config load for now')
@@ -349,27 +350,30 @@ class config_obj():
         model_obj = getattr(self.ml_models_cfg, model_name)
         model_obj.net = cv2.dnn.readNetFromCaffe(model_obj.prototxt_file, 
                                                         model_obj.model_file)
+    def get_dnn_model(self, model_name):
+        ''' Return the model obj (weights preloaded and all) from model name '''
+        model_obj = getattr(self.ml_models_cfg, model_name)
+        return model_obj
 
     # ---------- Cam Methods ----------------
-    def connect_to_cams(self, cams_name):
+    def connect_to_cams(self, cams_grp_name):
         ''' Connect to all specified cameras '''
         # Go through all cameras and connect to them
         # First get the cams config object associated with cams_name 
-        cams_config_obj = getattr(self.cams_cfg, cams_name)
-        for cam_name in cams_config_obj.all_cams_name:
-            print(cam_name)
+        cams_config_obj = getattr(self.cams_grp_cfg, cams_grp_name)
+        for cam_name in cams_config_obj.cam_grp_names:
             logging.info('Connecting to camera: {}'.format(cam_name))
             single_cam_obj = cams_config_obj.cam_config[cam_name]
             single_cam_obj.connect_to_cam()
 
-    def release_all_cams(self, cams_name):
+    def release_all_cams(self, cam_grp_name):
         ''' Release all cameras' resources '''
         # Go through all cameras and release to them
-        cams_config_obj = getattr(self.cams_cfg, cams_name)
-        for cam_name in cams_config_obj.all_cams_name:
+        cam_grp_config_obj = getattr(self.cams_grp_cfg, cam_grp_name)
+        for cam_name in cam_grp_config_obj.cam_grp_names:
             logging.info('Releasing camera: {}'.format(cam_name))
             # get the single cam object
-            single_cam_obj = cams_config_obj.cam_config[cam_name]
+            single_cam_obj = cam_grp_config_obj.cam_config[cam_name]
             single_cam_obj.cam_release()
 
     # ---------- Kafka Methods ----------------

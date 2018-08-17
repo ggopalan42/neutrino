@@ -16,6 +16,11 @@ def resize_qtr(image):
     img_half_w = int(image.shape[1]/4)
     return cv2.resize(image, (img_half_w, img_half_h))
 
+def cleanup(co):
+    ''' Cleanup before exiting '''
+    cv2.destroyAllWindows()
+    # Should anything be released on kafka and others?
+
 if __name__ == '__main__':
     # Write tests here
     pass

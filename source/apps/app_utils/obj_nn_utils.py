@@ -59,10 +59,8 @@ def process_detections(model_obj, image, detections, display_predictions = False
     return person_list
 
 
-def id_people(co, image, model_to_use = 'MobilenetSSD_V1', display_predictions = False):
+def id_people(co, image, model_obj, display_predictions = False):
     ''' Load the image and id any people in it '''
-    # get the model object
-    model_obj = getattr(co, model_to_use)
     # Construct an input blob for the image
     # by resizing to a fixed 300x300 pixels and then normalizing it
     # (note: normalization is done via the authors of the MobileNet SSD

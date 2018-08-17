@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
     # Connect to cams
     cams_name = co.get_app_cams_name(APP_NAME)
-    # co.connect_to_cams(cams_name)
+    co.connect_to_cams(cams_name)
 
     # Connect to Kafka
     # kafka_params_dict = co.get_app_kafka_params(APP_NAME)
@@ -250,6 +250,6 @@ if __name__ == '__main__':
     # ------ Do the main loop
     # main_loop(pc)
     # ------ Do the main loop
-    # co.release_all_cams(cams_name)
+    co.release_all_cams(cams_name)
     cleanup(co)
 

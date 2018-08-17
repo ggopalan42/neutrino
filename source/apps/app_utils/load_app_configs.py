@@ -28,6 +28,13 @@ logging.basicConfig(level=logging.INFO)
 # Set kafka module level higher. It spews a lot of junk
 logging.getLogger('kafka').setLevel(logging.WARNING)
 
+class mlmodels_config_class():
+    ''' Config object for mlmodels '''
+    def __init__(self):
+        # just a dummy class for now. This is to make the config_obj 
+        # naming more consistent
+        pass
+
 class mobilenetssd_v1():
     ''' MoblenetSSD V1 model parameters '''
     def __init__(self, models_path, mlmodel_dict):
@@ -41,6 +48,13 @@ class mobilenetssd_v1():
         self.previous_det = np.array([[[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]]])
         # Below is needed for person identification purposes only
         self.person_idx = self.classes.index('person')
+
+class cams_config_class():
+    ''' Config object for cams '''
+    def __init__(self):
+        # just a dummy class for now. This is to make the config_obj 
+        # naming more consistent
+        pass
 
 class single_cam_config():
     ''' Object that holds the config and methods of one camera '''
@@ -209,7 +223,7 @@ The config object is (generally) structured as follows:
     config_obj.apps_map
 
 1) config_obj.ml_models_cfg is generally structured as follows:
-     config_obj.ml_models_cfg[model_name1].<model_name1_attrs>
+     config_obj.ml_models_cfg.model_name1.<model_name1_attrs>
 2) Similarly for config_obj.cams_cfg:
      config_obj.cams_cfg.[cams_name1].<cams_name1_attrs>
 '''
@@ -243,7 +257,7 @@ class config_obj():
     def _load_mlmodels_configs(self, cfg_fn):
         ''' Go through the list of ml models specified and load them '''
         logging.info('Loading list of ML models from file: {}'.format(cfg_fn))
-        self.ml_models_cfg = {}
+        self.ml_models_cfg = mlmodels_config_class()
         mlmodels_list_fn = os.path.join(self.configs_path, cfg_fn)
         with open(mlmodels_list_fn) as fh:
             mlmodels_dict = yaml.load(fh)
@@ -266,14 +280,15 @@ class config_obj():
                                            .format(model_name))
                 raise RuntimeError('Class to load model named {} not '
                                            'implemented'.format(model_name))
-            self.ml_models_cfg[model_name] = model_config_obj
+            setattr(self.ml_models_cfg, model_name, model_config_obj)
 
     def _load_cams_configs(self, cfg_fn):
         ''' Go through the list of cam config files specified and 
             process them '''
         logging.info('Loading list of camera configs from file: {}'
                                                             .format(cfg_fn))
-        config_obj.cams_cfg = {}
+        self.cams_cfg = cams_config_class()
+        # config_obj.cams_cfg = {}
         cams_list_fn = os.path.join(self.configs_path, cfg_fn)
         self.list_of_cams = []
         with open(cams_list_fn) as fh:
@@ -285,7 +300,7 @@ class config_obj():
                 cams_cfg_dict = yaml.load(fh)
             cams_name = cams_cfg_dict['cams_name']
             cams_config_obj = all_cams_config(cams_cfg_dict)
-            self.cams_cfg[cams_name] = cams_config_obj
+            setattr(self.cams_cfg, cams_name, cams_config_obj)
             # Add the name of the cams if all of above successful
             self.list_of_cams.append(cams_name)
 
@@ -331,7 +346,7 @@ class config_obj():
     def load_dnn_model(self, model_name):
         ''' Load a model and weights. '''
         logging.info('Loading net and weights for model: {}'.format(model_name))
-        model_obj = self.ml_models_cfg[model_name]
+        model_obj = getattr(self.ml_models_cfg, model_name)
         model_obj.net = cv2.dnn.readNetFromCaffe(model_obj.prototxt_file, 
                                                         model_obj.model_file)
 
@@ -340,7 +355,7 @@ class config_obj():
         ''' Connect to all specified cameras '''
         # Go through all cameras and connect to them
         # First get the cams config object associated with cams_name 
-        cams_config_obj = self.cams_cfg[cams_name]
+        cams_config_obj = getattr(self.cams_cfg, cams_name)
         for cam_name in cams_config_obj.all_cams_name:
             print(cam_name)
             logging.info('Connecting to camera: {}'.format(cam_name))
@@ -350,7 +365,7 @@ class config_obj():
     def release_all_cams(self, cams_name):
         ''' Release all cameras' resources '''
         # Go through all cameras and release to them
-        cams_config_obj = self.cams_cfg[cams_name]
+        cams_config_obj = getattr(self.cams_cfg, cams_name)
         for cam_name in cams_config_obj.all_cams_name:
             logging.info('Releasing camera: {}'.format(cam_name))
             # get the single cam object

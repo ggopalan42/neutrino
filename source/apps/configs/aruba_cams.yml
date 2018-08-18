@@ -9,6 +9,7 @@ defaults:
             # be "hidden" unless the application (Axis cameras here) support
             # some type of auth. I have not found any so far
             enc_type: base64
+    stream_name: Aruba_SLR01_Cams
 
 # Cams fields explained:
 #   - cam_name:    -> Name of camera. Internal use and may appear in logs

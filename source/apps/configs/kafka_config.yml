@@ -1,5 +1,5 @@
 default_params:
-    kafka_msg_format_ver: 1.0.0
+    kafka_msg_format_ver: 1.1.0
 
 kafka_brokers:
     broker1:

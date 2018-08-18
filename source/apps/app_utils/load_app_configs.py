@@ -156,6 +156,7 @@ class cam_grp_config():
         self.cam_grp_config_dict = cfg_yaml_dict['cams']
         # Set all of the default creds
         self.default_creds = cfg_yaml_dict['defaults']['creds']
+        self.stream_name = cfg_yaml_dict['defaults']['stream_name']
         # Now setup all of the cams with their params
         self._setup_cam_grp_configs()
 
@@ -356,6 +357,19 @@ class config_obj():
         return model_obj
 
     # ---------- Cam Methods ----------------
+    def get_cam_grp_config_obj(self, cam_grp_name):
+        ''' Get and return the cam group config object from cam_grp_name '''
+        # The cam group config object is the class that holds information
+        # for the cam group cam_grp_name. This includes the single cam objects
+        # as well
+        cam_grp_config_obj = getattr(self.cams_grp_cfg, cam_grp_name)
+        return cam_grp_config_obj
+
+    def get_cam_grp_stream_name(self, cam_grp_name):
+        ''' Get the default stream_name for cam_grp_name '''
+        cam_grp_config_obj = getattr(self.cams_grp_cfg, cam_grp_name)
+        return cam_grp_config_obj.stream_name
+
     def connect_to_cams(self, cams_grp_name):
         ''' Connect to all specified cameras '''
         # Go through all cameras and connect to them

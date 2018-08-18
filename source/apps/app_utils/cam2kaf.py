@@ -59,12 +59,14 @@ def cam2kaf(co):
     # Get the ml model name
     ml_model_name = co.get_app_mlmodel(APP_NAME)
     model_obj = co.get_dnn_model(ml_model_name)
+    message_format_version = co.kafka_cfg.kafka_msg_format_ver
 
     # Go through each camera and count the number of people in them
     for cam_grp_name in co.cams_grp_names:
         # Get the cams config object for the cams_grp group and further
         # dive into it
-        cam_grp_config_obj = getattr(co.cams_grp_cfg, cam_grp_name)
+        cam_grp_config_obj = co.get_cam_grp_config_obj(cam_grp_name)
+        cam_grp_stream_name = co.get_cam_grp_stream_name(cam_grp_name)
         # Now go through each cam in that cams group
         for cam_name in cam_grp_config_obj.cam_grp_names:
             cam_obj = cam_grp_config_obj.cam_config[cam_name]
@@ -77,7 +79,7 @@ def cam2kaf(co):
                 if cam_obj.videowriter:
                     cam_obj.videowriter.write(image)
                 # ID Objects
-                ided_persons = obj_nn.id_people(co, image, model_obj, 
+                ided_objects = obj_nn.id_objects(co, image, model_obj, 
                           display_predictions = cam_obj.display_predictions)
 
                 # Show image if requested.
@@ -85,22 +87,16 @@ def cam2kaf(co):
                     cv2.imshow(cam_name, image)
                     cv2.waitKey(1)
 
-                # If person(s) have been detected in this image, 
+                # If objects(s) have been detected in this image, 
                 # feed the results to kafka
-                if len(ided_persons) > 0:
-                    logging.info('Person(s) detected in image')
-                    for person in ided_persons:
-                        timenow_secs = time.time()
-                        person['detect_time'] = timenow_secs
-                        # person['stream_name'] = pc.stream_name
-                        # tmp for now
-                        person['stream_name'] = 'Aruba_SLR01_Cams'
-                        person['msg_format_version'] = '1.0.0'
-                        logging.info(person)
-                        person_json = json.dumps(dict(person))
-                        # send_message(person_json, pc)
+                if len(ided_objects) > 0:
+                    kafka_message_dict = obj_nn.format_message(co, ided_objects,
+                                 cam_grp_stream_name, message_format_version)
+                    kafka_message_str = json.dumps(kafka_message_dict)
+                    logging.info('Object(s) detected in image: {}'
+                                                   .format(kafka_message_str))
                 else:
-                    logging.info('No people IDed in image')
+                    logging.info('No object IDed in image')
             else:
                 # If image read failed, log error
                 logging.error('Image read from camera {} failed.(error ret = {}'

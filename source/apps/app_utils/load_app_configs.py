@@ -420,6 +420,11 @@ class config_obj():
         kao =  kafka_app_obj(kafka_cfg_dict)
         setattr(kc, app_name, kao)
 
+    def get_kafka_app_obj(self, app_name):
+        ''' Given app_name, return the kafka object associated with it '''
+        kafka_obj = getattr(self.kafka_cfg, app_name)
+        return kafka_obj
+
     # -------------------- App methods ---------------------
     def get_app_mlmodel(self, app_name):
         ''' Given an app name, get the ml model name '''

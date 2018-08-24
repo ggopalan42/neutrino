@@ -439,6 +439,22 @@ class config_obj():
         return self.apps_map[app_name]['kafka']
 
     # ------------------- Others ------------------------
+    def set_app_name(self, app_name):
+        ''' Set the app name '''
+        self.app_name = app_name
+
+    def get_app_name(self):
+        ''' Return the app name '''
+        return self.app_name
+ 
+    def set_kafka_send_state(self, send_to_kafka):
+        ''' Set the send_to_kafka flag '''
+        self.send_to_kafka = send_to_kafka
+ 
+    def get_kafka_send_state(self):
+        ''' Get the send_to_kafka flag '''
+        return self.send_to_kafka
+ 
     def cleanup(self, cams_name):
         ''' Cleanup before exiting '''
         cv2.destroyAllWindows()

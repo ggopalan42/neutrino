@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+
+#################### I think this whole file can be obsoleted ###########
 ''' Utilities for People Counter application '''
 
 import base64

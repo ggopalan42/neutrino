@@ -32,9 +32,6 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger('kafka').setLevel(logging.WARNING)
 
 # Constants
-APP_NAME = 'helpdesk'
-SEND_TO_KAFKA = True
-
 # This is only if this is used as a main program
 def parse_args():
     ''' Parse the arguments and return a dict '''
@@ -58,10 +55,12 @@ def parse_args():
 def cam2kaf(co):
     ''' Read from image, identify objects and send ided objects to kafka '''
     # Get various objects for operation of this function
-    ml_model_name = co.get_app_mlmodel(APP_NAME)
+    app_name = co.get_app_name()
+    logging.info('App name is: {}'.format(app_name))
+    ml_model_name = co.get_app_mlmodel(app_name)
     model_obj = co.get_dnn_model(ml_model_name)
     message_format_version = co.kafka_cfg.kafka_msg_format_ver
-    kafka_obj = co.get_kafka_app_obj(APP_NAME)
+    kafka_obj = co.get_kafka_app_obj(app_name)
 
     # Go through each camera and count the number of people in them
     for cam_grp_name in co.cams_grp_names:
@@ -95,7 +94,7 @@ def cam2kaf(co):
                     kafka_message_dict = obj_nn.format_message(co, ided_objects,
                                  cam_grp_stream_name, message_format_version)
                     kafka_message_str = json.dumps(kafka_message_dict)
-                    if SEND_TO_KAFKA:
+                    if co.get_kafka_send_state():
                         kafka_obj.send_message(kafka_message_str)
                     else:
                         logging.info('Object(s) detected in image: {}'
@@ -118,11 +117,16 @@ def main_loop(co):
         return ['Keyboard Interrupt']
 
 if __name__ == '__main__':
+    APP_NAME = 'helpdesk'
+    SEND_TO_KAFKA = True
+
     # This is for testing
     # This can also be used as a tamplate for future apps
     # Initialize
     args = parse_args()
     co = lc.config_obj(args)
+    co.set_app_name(APP_NAME)
+    co.set_kafka_send_state(SEND_TO_KAFKA)
 
     # Load ml model parameters
     ml_model_name = co.get_app_mlmodel(APP_NAME)

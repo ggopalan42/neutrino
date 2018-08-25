@@ -5,11 +5,11 @@ apps_map:
         cams: aruba_cams
         kafka:
             broker: broker1
-            topic: peoplecounter1
+            topic: helpdesk1
     room_occ:
         ml_model: MobilenetSSD_V1
         cams: aruba_cams
         kafka:
             broker: broker1
-            topic: peoplecounter1
+            topic: roomocc1
 

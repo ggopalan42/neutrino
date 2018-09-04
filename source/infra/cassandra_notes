@@ -1,0 +1,18 @@
+Installation:
+    1. Followed the instructions here for debian package: http://cassandra.apache.org/download/
+
+    2. Did the following:
+         a.  echo "deb http://www.apache.org/dist/cassandra/debian 311x main" | sudo tee -a /etc/apt/sources.list.d/cassandra.sources.list
+         b. curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -
+         c. sudo apt-get update
+         d. sudo apt-get install cassandra
+
+    3. Check for status:
+        a) service cassandra status
+        b) systemctl status cassandra.service
+
+    4. Looks like cassandra-driver was installed using pip:
+          pip install cassandra-driver.
+       This cassandra-driver is from Datastax
+
+

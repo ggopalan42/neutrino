@@ -15,4 +15,8 @@ Installation:
           pip install cassandra-driver.
        This cassandra-driver is from Datastax
 
+Configuration:
+    1. Edited /etc/cassandra/cassandra.yaml and changed:
+         a. data_file_directories:
+                 - /data/data3/cassandra/data (prev was /var/lib/cassandra/data)
 

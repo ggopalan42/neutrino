@@ -1,0 +1,46 @@
+1) Installing kafka
+   a. Installing kafka using this page: https://www.digitalocean.com/community/tutorials/how-to-install-apache-kafka-on-ubuntu-14-04
+   b. Install java:
+       i. sudo apt-get update
+      ii. sudo apt-get install default-jre
+   c. Install Zookeper:
+       i. sudo apt-get install zookeeperd
+      ii. Test it: Use 'telnet localhost 2181' and at prompt, send 'ruok'. It will respoind by: 'imok'
+
+   b. These are the staps I followed on alpha42:
+      i. useradd kafka -m
+     ii. passwd kafka
+    iii. adduser kafka sudo
+     iv. su - kafka
+      v. mkdir kafka  and then cd to it
+     vi. wget http://apache.claz.org/kafka/1.0.0/kafka_2.11-1.0.0.tgz .
+    vii. tar xvzf kafka_2.11-1.0.0.tgz. After untaring, move this dir to ~/kafka
+   viii. Then: vi ~/kafka/config/server.properties and then add: "delete.topic.enable = true" to the end of the file
+     ix. Now start kafka by: nohup ~/kafka/bin/kafka-server-start.sh ~/kafka/config/server.properties > ~/kafka/kafka.log 2>&1 &
+
+   e. Now test the installation:
+    i.   echo "Hello, World" | ~/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic TutorialTopic > /dev/null
+    ii. ~/kafka/bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic TutorialTopic --from-beginning
+
+ 
+2) The first kafka on docker service was created by running the below:
+   (this is from the article in: https://howtoprogram.xyz/2016/07/21/using-apache-kafka-docker/)
+    docker run -d -p 2181:2181 --name zookeeper jplock/zookeeper
+    docker run -d --name kafka1 --link zookeeper:zookeeper ches/kafka
+    ZK_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' zookeeper)
+    KAFKA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' kafka1)
+    echo $ZK_IP
+    echo $KAFKA_IP
+    docker run --rm ches/kafka kafka-topics.sh --create --topic test --replication-factor 1 --partitions 1 --zookeeper $ZK_IP:2181
+
+3) Remote communications to this kafka was done using this article: https://aknay.github.io/2017/05/15/sending-messages-across-the-network-with-producer-and-consumer-using-kafka-and-zookeeper.html
+    i) Changed kafka/config/server.properties:
+           line: advertised.listeners=PLAINTEXT://alpha42.niaramfg.arubanetworks.com:9092
+
+    ii)  
+
+4) Kafka python was installed on all machines using either:
+         1. pip install kafka-python
+         2. conda install -c conda-forge kafka-python 
+
+

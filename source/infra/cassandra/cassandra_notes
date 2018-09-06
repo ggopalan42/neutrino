@@ -20,3 +20,15 @@ Configuration:
          a. data_file_directories:
                  - /data/data3/cassandra/data (prev was /var/lib/cassandra/data)
 
+Procedures:
+    1. Moving cassandra directories - esp. the data dir
+          a. Stop cassandra (service cassandra stop)
+          b. Create a new data (or other) dir.
+          c. Copy or move old data to new data dir.
+          d. Make sure the new dir is owned by "cassandra"
+          e. Make sure the new dir groups is "cassandra"
+          f. Make sure that the dir and files are writable
+          g. Change the configuration per above
+          h. Start cassandra (service cassandra start)
+
+

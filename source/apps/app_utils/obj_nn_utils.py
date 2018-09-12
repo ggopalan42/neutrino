@@ -8,13 +8,15 @@ import logging
 
 import numpy as np
 
-def format_message(co, det_obj_list, stream_name, message_version):
+def format_message(co, det_obj_list, stream_grp_name, stream_name, 
+                   message_version):
     ''' Format a message in the expected format ready for sending to kafka. '''
     # Return formated message as a dict. Upto the requester how its converted
     kafka_message_dict = {}
     # Setup base message
     timenow_secs = time.time()
     kafka_message_dict['detect_time'] = int(timenow_secs * 1e6) # ts is in us
+    kafka_message_dict['stream_group_name'] = stream_grp_name
     kafka_message_dict['stream_name'] = stream_name
     kafka_message_dict['msg_format_version'] = message_version
     kafka_message_dict['objects_list'] = det_obj_list

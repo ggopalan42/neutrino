@@ -1,15 +1,24 @@
 # This config file maps various apps to the components of config to use
 apps_map:
+    # I think helpdesk and room-occ applications can go obsolete. 
+    # All replaced with camfeeds1
     helpdesk:
         ml_model: MobilenetSSD_V1
         cams: aruba_cams
         kafka:
             broker: broker1
-            topic: helpdesk1
+            topic: camsfeed1
     room_occ:
         ml_model: MobilenetSSD_V1
         cams: aruba_cams
         kafka:
             broker: broker1
-            topic: roomocc1
+            topic: camsfeed1
+
+    camfeeds1:
+        ml_model: MobilenetSSD_V1
+        cams: aruba_cams
+        kafka:
+            broker: broker1
+            topic: camsfeed1
 

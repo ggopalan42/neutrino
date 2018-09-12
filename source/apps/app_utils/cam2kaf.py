@@ -71,6 +71,7 @@ def cam2kaf(co):
         # Now go through each cam in that cams group
         for cam_name in cam_grp_config_obj.cam_grp_names:
             cam_obj = cam_grp_config_obj.cam_config[cam_name]
+            cam_stream_name = cam_obj.stream_name
 
             # Read from cam and process for objects if valid image
             valid_image, image = cam_obj.cap_handle.read()
@@ -92,7 +93,8 @@ def cam2kaf(co):
                 # feed the results to kafka
                 if len(ided_objects) > 0:
                     kafka_message_dict = obj_nn.format_message(co, ided_objects,
-                                 cam_grp_stream_name, message_format_version)
+                                 cam_grp_stream_name, cam_stream_name, 
+                                 message_format_version)
                     kafka_message_str = json.dumps(kafka_message_dict)
                     if co.get_kafka_send_state():
                         kafka_obj.send_message(kafka_message_str)
@@ -117,8 +119,8 @@ def main_loop(co):
         return ['Keyboard Interrupt']
 
 if __name__ == '__main__':
-    APP_NAME = 'helpdesk'
-    SEND_TO_KAFKA = True
+    APP_NAME = 'camfeeds1'
+    SEND_TO_KAFKA = False
 
     # This is for testing
     # This can also be used as a tamplate for future apps

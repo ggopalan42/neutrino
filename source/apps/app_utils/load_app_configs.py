@@ -66,6 +66,7 @@ class single_cam_config():
         self.valid = cam_dict[cam_name]['valid']
         self.display_name = cam_dict[cam_name]['display_name']
         self.description = cam_dict[cam_name]['description']
+        self.stream_name = cam_dict[cam_name]['stream_name']
         self.cam_type = cam_dict[cam_name]['cam_type']
         self.cam_proto = cam_dict[cam_name]['cam_proto']
         self.cam_hostname = cam_dict[cam_name]['cam_hostname']
@@ -156,7 +157,7 @@ class cam_grp_config():
         self.cam_grp_config_dict = cfg_yaml_dict['cams']
         # Set all of the default creds
         self.default_creds = cfg_yaml_dict['defaults']['creds']
-        self.stream_name = cfg_yaml_dict['defaults']['stream_name']
+        self.stream_group_name = cfg_yaml_dict['defaults']['stream_group_name']
         # Now setup all of the cams with their params
         self._setup_cam_grp_configs()
 
@@ -368,7 +369,7 @@ class config_obj():
     def get_cam_grp_stream_name(self, cam_grp_name):
         ''' Get the default stream_name for cam_grp_name '''
         cam_grp_config_obj = getattr(self.cams_grp_cfg, cam_grp_name)
-        return cam_grp_config_obj.stream_name
+        return cam_grp_config_obj.stream_group_name
 
     def connect_to_cams(self, cams_grp_name):
         ''' Connect to all specified cameras '''

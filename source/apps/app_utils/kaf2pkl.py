@@ -17,7 +17,7 @@ logging.getLogger('kafka').setLevel(logging.WARNING)
 PC_COL_NAMES = ['detect_time', 'msg_format_version', 'stream_name', 'found', 
                 'startX', 'startY', 'endX', 'endY', 'confidence']
 # Again lotsa magic variables
-TOPIC = 'roomocc1'
+TOPIC = 'camsfeed1'
 KAFKA_SERVER = '10.2.13.29'
 KAFKA_PORT = '9092'
 PC_STREAM_NAME = 'Aruba_SLR01_Cams'

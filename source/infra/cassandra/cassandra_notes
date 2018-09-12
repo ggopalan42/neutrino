@@ -31,4 +31,9 @@ Procedures:
           g. Change the configuration per above
           h. Start cassandra (service cassandra start)
 
+Stats, nodetool:
+    1. Do this to get usage of a table: nodetool -h localhost cfstats -- gg_expt2.gg_table2
+
+
+
 

@@ -30,8 +30,10 @@ SYSTEM_KS = ['system_schema', 'system', 'system_distributed',
 # WILL repeat many times. Many objects are typically detected in a single frame
 TABLE_COLUMNS_1p1p0 = ('( detect_time bigint, '
                        'dummy_count int, ' 
+                       'detect_time_hr text, ' 
                        'confidence float, '
                        'found text, '
+                       'stream_group_name text, '
                        'stream_name text, '
                        'msg_format_version text, '
                        'startX float, '
@@ -59,8 +61,9 @@ def parse_args():
 
     return args
 
+''' ------------ Obsolete functions. They are in cassandra_cluster class now 
 def create_table(cass, table_name, ks_name):
-    ''' Create specified table in keyspace ks_name if it does not exist '''
+    # Create specified table in keyspace ks_name if it does not exist
     cmd = "CREATE TABLE IF NOT EXISTS {ks_name}.{table_name} {cols}".format(
                                    ks_name=ks_name, table_name=table_name,
                                    cols = TABLE_COLUMNS_1p1p0)
@@ -70,28 +73,31 @@ def create_table(cass, table_name, ks_name):
     logging.info('Create command returned: {}'.format(retval))
 
 def delete_table(cass, table_name, ks_name):
-    ''' Delete specified table from keyspace ks_name  '''
+    # Delete specified table from keyspace ks_name
     cmd = "DROP TABLE IF EXISTS {ks_name}.{table_name};".format(
                              ks_name=ks_name, table_name=table_name)
     logging.info('Deleting keyspace with command: {}'.format(cmd))
     retval = cass.session.execute(cmd)
     # TBD: Not too sure how to check for creating failures
     logging.info('Delete command returned: {}'.format(retval))
+'''
+
 
 def main():
     ''' main program '''
     args = parse_args()
     # Connect to cassandra db
-    cass = cu.cassandra_cluster([HOSTNAME])
+    cass = cu.cassandra_utils([HOSTNAME])
 
     if args['add_table']:
         logging.info('Adding Table {} to Keyspace {}'
                                 .format(args['add_table'], args['ks_name']))
-        create_table(cass, args['add_table'], args['ks_name'])
+        cass.create_table(args['ks_name'], args['add_table'], 
+                                                      TABLE_COLUMNS_1p1p0)
     elif args['delete_table']:
         logging.info('Deleting Table {} from Keyspace {}'
                                 .format(args['delete_table'], args['ks_name']))
-        delete_table(cass, args['delete_table'], args['ks_name'])
+        cass.delete_table(args['ks_name'], args['delete_table'])
     else:
         logging.error('Need to specify either add or delete option')
     cass.cleanup()

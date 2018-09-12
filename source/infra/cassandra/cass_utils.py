@@ -1,6 +1,10 @@
 #! /usr/bin/env python
 
 ''' General cassandra utilities '''
+# Note: This belongs in the dir:
+#  $NEUTRINO_HOME/projects/infra/cassandra
+#  need to figure out a way to make all this work seamlessly
+
 
 import logging
 
@@ -9,13 +13,33 @@ from cassandra.cluster import Cluster
 # Set logging level
 logging.basicConfig(level=logging.INFO)
 
-# Constants
+# Constants. Move them all later to config files
 HOSTNAME = '127.0.0.1'       # Localhost. Later move this to a config
 SYSTEM_KS = ['system_schema', 'system', 'system_distributed', 
              'system_auth', 'system_traces',]
 KEYSPACE = 'gg_expt1'
 
-class cassandra_cluster():
+# ------------ Needs to be moved to config file later ------------
+# table columns for message format 1.1.0
+# The dummy_count entry is to have a "second" primary key since detect_time
+# WILL repeat many times. Many objects are typically detected in a single frame
+TABLE_COLUMNS_1p1p0 = ('( detect_time bigint, '
+                       'dummy_count int, '
+                       'detect_time_hr text, '
+                       'confidence float, '
+                       'found text, '
+                       'stream_group_name text, '
+                       'stream_name text, '
+                       'msg_format_version text, '
+                       'startX float, '
+                       'endX float, '
+                       'startY float, '
+                       'endY float, '
+                       'PRIMARY KEY (detect_time, dummy_count) '
+                       ') with clustering order by (dummy_count asc);'
+                      )
+
+class cassandra_utils():
     ''' Object that holds all cassandra related information '''
     def __init__(self, hosts_list):
         self.hosts_list = hosts_list
@@ -74,6 +98,25 @@ class cassandra_cluster():
         ''' Set the default keyspace '''
         logging.info('Setting cluster keyspace to: {}'.format(keyspace))
         self.session.set_keyspace(keyspace)
+
+    def create_table(cass, ks_name, table_name, table_columns):
+        ''' Create specified table in keyspace ks_name if it does not exist '''
+        cmd = "CREATE TABLE IF NOT EXISTS {ks_name}.{table_name} {cols}".format(
+                                       ks_name=ks_name, table_name=table_name,
+                                       cols = table_columns)
+        logging.info('Creating table with command: {}'.format(cmd))
+        retval = cass.session.execute(cmd)
+        # TBD: Not too sure how to check for creating failures
+        logging.info('Create command returned: {}'.format(retval))
+
+    def delete_table(cass, ks_name, table_name):
+        ''' Delete specified table from keyspace ks_name  '''
+        cmd = "DROP TABLE IF EXISTS {ks_name}.{table_name};".format(
+                                 ks_name=ks_name, table_name=table_name)
+        logging.info('Deleting table with command: {}'.format(cmd))
+        retval = cass.session.execute(cmd)
+        # TBD: Not too sure how to check for creating failures
+        logging.info('Delete command returned: {}'.format(retval))
 
     def cleanup(self):
         ''' Close all connections to the Cassandra cluster '''

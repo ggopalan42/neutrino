@@ -191,7 +191,7 @@ cams:
         kafka_key: slr01_bldg_d_f3_elevators 
 
     - slr01_bldg_d_f4_helpdesk:
-        valid: True
+        valid: False
         display_name: Aruba SLR01 Bldg D Floor 4 Helpdesk
         description: "Aruba, Santa Clara Campus, Building D, Floor 4, Helpdesk"
         stream_name: bldg_d_f4_helpdesk
@@ -218,9 +218,9 @@ cams:
         display_name: Aruba SLR01 Bldg D Floor 2 Archimedes
         description: "Aruba, Santa Clara Campus, Building D, Floor 2, Archimedes"
         stream_name: bldg_d_f2_conf_archimedes
-        cam_type: read_from_file
+        cam_type: local_usb
         cam_proto: NA
-        cam_hostname: read_from_file
+        cam_hostname: local_usb
         cam_uri: 0               # 0 here refers to local USB bus #
         cam_creds: aruba_axis1
         building_id: 5f971b484a0539579569ba33ab90a5caffff  # Incorrect
@@ -234,3 +234,4 @@ cams:
         kafka_topic: aruba_slr01_people_counter1
         kafka_partition: 10      # Or None if topic# need not be assigned
         kafka_key: slr01_bldg_d_f4_helpdesk
+

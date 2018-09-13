@@ -48,7 +48,7 @@ cams:
         cam_creds: aruba_axis1
         building_id: 418f3c0516fc3ee49ee01a20e00835de
         floor_id: 99e9db7aaea13f07b783cb4650811630
-        read_from_file: /home/ggopalan/data/videos/aruba_cams/slr01_bldg_d_f1_elevators_lt1.mjpg
+        # read_from_file: /home/ggopalan/data/videos/aruba_cams/slr01_bldg_d_f1_elevators_lt1.mjpg
         # read_from_file: video.mjpg
         # read_from_file: slr01_bldg_d_f1_elevators_lt1.mjpg
         # write_to_file: vid1.mjpg
@@ -71,7 +71,7 @@ cams:
         cam_creds: aruba_axis1
         building_id: 418f3c0516fc3ee49ee01a20e00835de
         floor_id: 99e9db7aaea13f07b783cb4650811630
-        read_from_file: slr01_bldg_d_f1_rear_lobby_entrance_lt1.mjpg
+        # read_from_file: slr01_bldg_d_f1_rear_lobby_entrance_lt1.mjpg
         # write_to_file: vid2.mjpg
         display_image: True
         display_predictions: True
@@ -226,7 +226,7 @@ cams:
         building_id: 5f971b484a0539579569ba33ab90a5caffff  # Incorrect
         floor_id: 2ce68fbe28a4335b9c7819b227c701b9ffff  # Incorrect
         cam_sub_image: "300 1000 300 1100"  # StartX, EndX, StartY, EndY
-        read_from_file: /home/ggopalan/data/videos/aruba_cams/archimedes_0824_1641.mjpg
+        # read_from_file: /home/ggopalan/data/videos/aruba_cams/archimedes_0824_1641.mjpg
         # write_to_file: archimedes_0824_1641.mjpg
         display_image: True
         display_predictions: True

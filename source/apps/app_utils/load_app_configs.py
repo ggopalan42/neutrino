@@ -132,7 +132,7 @@ class single_cam_config():
         elif self.cam_type == 'local_usb':
             logging.info('Connecting to local camera on bus: {}'
                                                   .format(self.cam_uri))
-                        self.cap_handle = cv2.VideoCapture(self.cam_uri)
+            self.cap_handle = cv2.VideoCapture(self.cam_uri)
         else:
             logging.info('Connecting to camera: {}'.format(self.cam_name))
             self.cap_handle = cv2.VideoCapture(self.cam_url)

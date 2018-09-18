@@ -28,8 +28,7 @@ SYSTEM_KS = ['system_schema', 'system', 'system_distributed',
 # table columns for message format 1.1.0
 # The dummy_count entry is to have a "second" primary key since detect_time
 # WILL repeat many times. Many objects are typically detected in a single frame
-TABLE_COLUMNS_1p1p0 = ('( detect_time bigint, '
-                       'dummy_count int, ' 
+TABLE_COLUMNS_1p1p0 = ('( detect_time100 bigint, '
                        'detect_time_hr text, ' 
                        'confidence float, '
                        'found text, '
@@ -40,8 +39,8 @@ TABLE_COLUMNS_1p1p0 = ('( detect_time bigint, '
                        'endX float, '
                        'startY float, '
                        'endY float, '
-                       'PRIMARY KEY (detect_time, dummy_count) '
-                       ') with clustering order by (dummy_count asc);' 
+                       'PRIMARY KEY (detect_time100) '
+                       ');' 
                       )
 
 def parse_args():

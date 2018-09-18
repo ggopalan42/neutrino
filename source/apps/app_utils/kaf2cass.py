@@ -41,7 +41,7 @@ CASS_TABLE_DATE_FORMAT = '%Y%m%d'
 # in multiple rows.  This is a common occurance becasue multiple objects will
 # most always be detected in a video frame. This field will simply increment
 # by one every time same same detect_time is inserted into the table.
-CASS_COL_NAMES = ['detect_time', 'dummy_count', 'detect_time_hr', 
+CASS_COL_NAMES = ['detect_time100', 'detect_time_hr', 
                   'confidence', 'found', 'stream_name', 'stream_group_name', 
                   'msg_format_version', 'startX', 'endX', 'startY', 'endY']
 
@@ -133,7 +133,7 @@ def kafka_to_cass(kaf, cass):
                 dummy_count = 0
                 df_json = {}
                 detect_time_epoch = kafka_msg_json['detect_time']
-                df_json['detect_time'] = detect_time_epoch
+                df_json['detect_time100'] = detect_time_epoch
                 df_json['detect_time_hr'] = epoch_to_time_hr(detect_time_epoch)
                 df_json['stream_group_name']=kafka_msg_json['stream_group_name']
                 df_json['stream_name'] = kafka_msg_json['stream_name']
@@ -141,10 +141,11 @@ def kafka_to_cass(kaf, cass):
                 # Unfurl the lis of objects detected into the single dict
                 for df_sub_json in kafka_msg_json['objects_list']:
                     combined_dict = dict(df_json, **df_sub_json)
-                    # Put in the "dummy_count" so there can be many entries
-                    # for same timestamp. In Cassandra, the "detect_time" and
-                    # "dummy_count" columns are combined (primary) keys.
-                    combined_dict['dummy_count'] = dummy_count
+                    # The equation below creates a unique primary key for 
+                    # insertion. TBD Later: Move to a function with better
+                    # doc if this works
+                    combined_dict['detect_time100'] = ((detect_time_epoch * 100)
+                                                           + dummy_count)
                     dummy_count += 1
                     # Now after processing a message from Kafka, enter it(them)
                     # into Cassandra

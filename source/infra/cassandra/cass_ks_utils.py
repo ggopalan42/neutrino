@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 HOSTNAME = '127.0.0.1'       # Localhost. Later move this to a config
 SYSTEM_KS = ['system_schema', 'system', 'system_distributed', 
              'system_auth', 'system_traces',]
-KEYSPACE_NAME = 'gg_expt2'    # The keyspace in which to create the table
+KEYSPACE_NAME = 'gg_expt3'    # The keyspace in which to create the table
 
 def parse_args():
     ''' Parse the arguments and return a dict '''
@@ -60,7 +60,7 @@ def main():
     ''' main program '''
     args = parse_args()
     # Connect to cassandra db
-    cass = cu.cassandra_cluster([HOSTNAME])
+    cass = cu.cassandra_utils([HOSTNAME])
 
     if args['add_ks']:
         logging.info('Adding Keyspace {} to Cassandra DB'

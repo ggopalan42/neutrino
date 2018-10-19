@@ -1,0 +1,49 @@
+Schema for camfeeds_sv1_<date>:
+
+TABLE_COLUMNS_1p1p0 = ('( detect_time100 bigint, '
+                       'detect_time_hr text, '
+                       'confidence float, '
+                       'found text, '
+                       'stream_group_name text, '
+                       'stream_name text, '
+                       'msg_format_version text, '
+                       'startX float, '
+                       'endX float, '
+                       'startY float, '
+                       'endY float, '
+                       'PRIMARY KEY (detect_time100) '
+                       ');'
+                      )
+
+
+-----------------------------------------------------------------------------
+
+Example dump from table:
+
+detect_time100     | confidence | detect_time_hr           | endx | endy | found       | msg_format_version | startx | starty | stream_group_name | stream_name
+--------------------+------------+--------------------------+------+------+-------------+--------------------+--------+--------+-------------------+--------------------------
+153993619335464100 |   0.804056 | 2018-10-19_01:03:13-0700 |  742 |  518 |       chair |              1.1.0 |    503 |    285 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153994736406069904 |   0.257678 | 2018-10-19_04:09:24-0700 |  304 |  451 |       chair |              1.1.0 |     12 |     70 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153994955887407503 |   0.847251 | 2018-10-19_04:45:58-0700 | 1167 |  784 | diningtable |              1.1.0 |     73 |    136 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153997409616582600 |   0.503941 | 2018-10-19_11:34:56-0700 |  544 |  527 |       chair |              1.1.0 |    279 |    276 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153994864527517803 |   0.347307 | 2018-10-19_04:30:45-0700 |  869 |  205 |       chair |              1.1.0 |    705 |     44 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153993931015266504 |   0.886136 | 2018-10-19_01:55:10-0700 | 1174 |  804 | diningtable |              1.1.0 |     80 |    136 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153995827280909603 |   0.715054 | 2018-10-19_07:11:12-0700 |  450 |  472 |       chair |              1.1.0 |    210 |    258 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153997105515299105 |   0.747101 | 2018-10-19_10:44:15-0700 | 1281 |  293 |        sofa |              1.1.0 |    828 |      9 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153996184062339900 |   0.987703 | 2018-10-19_08:10:40-0700 |  746 |  620 |       chair |              1.1.0 |    414 |    260 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153996905899860301 |   0.416211 | 2018-10-19_10:10:58-0700 | 1470 | 1035 |       chair |              1.1.0 |   1245 |    607 |  Aruba_SLR01_Cams | bldg_d_f2_conf_archimedes
+ 153996450996744801 |   0.382427 | 2018-10-19_08:55:09-0700 | 1102 |  731 |       chair |              1.1.0 |    796 |    198 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153996932614111704 |   0.997806 | 2018-10-19_10:15:26-0700 | 1096 |  913 |      person |              1.1.0 |    814 |    143 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153995595979875100 |   0.781235 | 2018-10-19_06:32:39-0700 |  212 |  514 |       chair |              1.1.0 |      0 |    199 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153994822120034401 |   0.572297 | 2018-10-19_04:23:41-0700 |  208 |  466 |       chair |              1.1.0 |     -6 |    100 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153994055076102004 |   0.839447 | 2018-10-19_02:15:50-0700 | 1179 |  810 | diningtable |              1.1.0 |     78 |    125 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153997028384178804 |   0.342266 | 2018-10-19_10:31:23-0700 |  446 |  960 |       chair |              1.1.0 |     14 |    624 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153994190808654006 |   0.834879 | 2018-10-19_02:38:28-0700 | 1163 |  769 | diningtable |              1.1.0 |     89 |    133 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153995685614554502 |   0.750794 | 2018-10-19_06:47:36-0700 |  872 |  203 |       chair |              1.1.0 |    706 |     37 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153996206955384803 |   0.341919 | 2018-10-19_08:14:29-0700 |  236 |  539 |      person |              1.1.0 |      0 |     63 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153996052570741801 |    0.38233 | 2018-10-19_07:48:45-0700 | 1343 |  836 |       chair |              1.1.0 |   1168 |    543 |  Aruba_SLR01_Cams | bldg_d_f2_conf_archimedes
+ 153996630856464602 |   0.548857 | 2018-10-19_09:25:08-0700 |  201 |  455 |       chair |              1.1.0 |     14 |    203 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153995997733729500 |   0.382967 | 2018-10-19_07:39:37-0700 | 1068 | 1036 |       chair |              1.1.0 |    899 |    667 |  Aruba_SLR01_Cams | bldg_d_f2_conf_archimedes
+ 153995868846023300 |    0.90691 | 2018-10-19_07:18:08-0700 |  733 |  515 |       chair |              1.1.0 |    494 |    284 |  Aruba_SLR01_Cams |        bldg_d_f4_helpdesk
+ 153994119516304100 |   0.254702 | 2018-10-19_02:26:35-0700 | 1074 | 1013 |      bottle |              1.1.0 |    904 |    699 |  Aruba_SLR01_Cams | bldg_d_f2_conf_archimedes
+

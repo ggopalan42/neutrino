@@ -1,0 +1,18 @@
+IN JSON format. As it will show up in kafak: {"detect_time": 1535478311412215, "stream_name": "Aruba_SLR01_Cams", "msg_format_version": "1.1.0", "objects_list": [{"found": "chair", "confidence": 0.9979294538497925, "startX": 676, "startY": 438, "endX": 995, "endY": 777}, {"found": "chair", "confidence": 0.5164726376533508, "startX": 31, "startY": 39, "endX": 358, "endY": 483}, {"found": "chair", "confidence": 0.46034497022628784, "startX": 684, "startY": 14, "endX": 917, "endY": 260}, {"found": "diningtable", "confidence": 0.9715747833251953, "startX": 43, "startY": 137, "endX": 1225, "endY": 777}]}
+
+
+Format needed in db:
+detect_time confidence found stream_name msg_format_version startX endX startY endY
+1535155734311095 0.5251787304878235 chair Aruba_SLR01_Cams 1.1.0 1299 1563 588 922
+1535155734311095 0.34599068760871887 chair Aruba_SLR01_Cams 1.1.0 624 877 559 983
+1535155734311095 0.8212401866912842 diningtable Aruba_SLR01_Cams 1.1.0 726 1435 621 1079
+1535155734311095 0.4583374261856079 person Aruba_SLR01_Cams 1.1.0 1301 1554 508 840
+1535155734470435 0.5029921531677246 chair Aruba_SLR01_Cams 1.1.0 1300 1564 587 918
+1535155734470435 0.38384515047073364 chair Aruba_SLR01_Cams 1.1.0 622 879 558 981
+1535155734470435 0.806638240814209 diningtable Aruba_SLR01_Cams 1.1.0 725 1430 622 1079
+1535155734470435 0.4751611351966858 person Aruba_SLR01_Cams 1.1.0 1302 1555 510 839
+1535155734470435 0.29024815559387207 person Aruba_SLR01_Cams 1.1.0 694 903 489 859
+1535155734643310 0.5867025852203369 chair Aruba_SLR01_Cams 1.1.0 1301 1563 592 922
+1535155734643310 0.41244974732398987 chair Aruba_SLR01_Cams 1.1.0 624 881 560 988
+1535155734643310 0.7770668268203735 diningtable Aruba_SLR01_Cams 1.1.0 724 1429 624 1079
+1535155734643310 0.43301472067832947 person Aruba_SLR01_Cams 1.1.0 1305 1553 509 842

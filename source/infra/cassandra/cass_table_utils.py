@@ -25,9 +25,7 @@ logging.basicConfig(level=logging.INFO)
 HOSTNAME = '127.0.0.1'       # Localhost. Later move this to a config
 SYSTEM_KS = ['system_schema', 'system', 'system_distributed', 
              'system_auth', 'system_traces',]
-# table columns for message format 1.1.0
-# The dummy_count entry is to have a "second" primary key since detect_time
-# WILL repeat many times. Many objects are typically detected in a single frame
+# table columns for message format 1.1.0 (aka sv1)
 TABLE_COLUMNS_1p1p0 = ('( detect_time100 bigint, '
                        'detect_time_hr text, ' 
                        'confidence float, '
@@ -41,6 +39,22 @@ TABLE_COLUMNS_1p1p0 = ('( detect_time100 bigint, '
                        'endY float, '
                        'PRIMARY KEY (detect_time100) '
                        ');' 
+                      )
+
+# Table definitions and columns for schema: SV2 (SV2 = schema version 2)
+TABLE_COLUMNS_SV2 = ('( detect_time100 bigint, '
+                       'detect_time_hr text, ' 
+                       'confidence float, '
+                       'found text, '
+                       'stream_group_name text, '
+                       'stream_name text, '
+                       'msg_format_version text, '
+                       'startX float, '
+                       'endX float, '
+                       'startY float, '
+                       'endY float, '
+                       'PRIMARY KEY ((stream_group_name, stream_name) detect_time100) '
+                       ') WITH CLUSTERING ORDER BY (detect_time100 ASC);' 
                       )
 
 def parse_args():
@@ -60,28 +74,6 @@ def parse_args():
 
     return args
 
-''' ------------ Obsolete functions. They are in cassandra_cluster class now 
-def create_table(cass, table_name, ks_name):
-    # Create specified table in keyspace ks_name if it does not exist
-    cmd = "CREATE TABLE IF NOT EXISTS {ks_name}.{table_name} {cols}".format(
-                                   ks_name=ks_name, table_name=table_name,
-                                   cols = TABLE_COLUMNS_1p1p0)
-    logging.info('Creating table with command: {}'.format(cmd))
-    retval = cass.session.execute(cmd)
-    # TBD: Not too sure how to check for creating failures
-    logging.info('Create command returned: {}'.format(retval))
-
-def delete_table(cass, table_name, ks_name):
-    # Delete specified table from keyspace ks_name
-    cmd = "DROP TABLE IF EXISTS {ks_name}.{table_name};".format(
-                             ks_name=ks_name, table_name=table_name)
-    logging.info('Deleting keyspace with command: {}'.format(cmd))
-    retval = cass.session.execute(cmd)
-    # TBD: Not too sure how to check for creating failures
-    logging.info('Delete command returned: {}'.format(retval))
-'''
-
-
 def main():
     ''' main program '''
     args = parse_args()
@@ -92,7 +84,7 @@ def main():
         logging.info('Adding Table {} to Keyspace {}'
                                 .format(args['add_table'], args['ks_name']))
         cass.create_table(args['ks_name'], args['add_table'], 
-                                                      TABLE_COLUMNS_1p1p0)
+                                                      TABLE_COLUMNS_SV2)
     elif args['delete_table']:
         logging.info('Deleting Table {} from Keyspace {}'
                                 .format(args['delete_table'], args['ks_name']))

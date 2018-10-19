@@ -20,9 +20,7 @@ SYSTEM_KS = ['system_schema', 'system', 'system_distributed',
 KEYSPACE = 'gg_expt1'
 
 # ------------ Needs to be moved to config file later ------------
-# table columns for message format 1.1.0
-# The dummy_count entry is to have a "second" primary key since detect_time
-# WILL repeat many times. Many objects are typically detected in a single frame
+# table columns for message format 1.1.0 (aka sv1)
 TABLE_COLUMNS_1p1p0 = ('( detect_time100 bigint, '
                        'detect_time_hr text, '
                        'confidence float, '
@@ -36,6 +34,22 @@ TABLE_COLUMNS_1p1p0 = ('( detect_time100 bigint, '
                        'endY float, '
                        'PRIMARY KEY (detect_time100) '
                        ');'
+                      )
+
+# Table definitions and columns for schema: SV2 (SV2 = schema version 2)
+TABLE_COLUMNS_SV2 = ('( detect_time100 bigint, '
+                       'detect_time_hr text, '
+                       'confidence float, '
+                       'found text, '
+                       'stream_group_name text, '
+                       'stream_name text, '
+                       'msg_format_version text, '
+                       'startX float, '
+                       'endX float, '
+                       'startY float, '
+                       'endY float, '
+                       'PRIMARY KEY ((stream_group_name, stream_name) detect_time100) '
+                       ') WITH CLUSTERING ORDER BY (detect_time100 ASC);'
                       )
 
 class cassandra_utils():

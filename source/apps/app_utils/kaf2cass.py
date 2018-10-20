@@ -35,7 +35,7 @@ PC_DF_SAVE_COUNT = 100    # Save the DF every PC_DF_SAVE_COUNT rows
 # Cassandra constants: Again lotsa magic variables
 CASS_HOSTNAME = '127.0.0.1'       # Localhost. Later move this to a config
 CASS_KEYSPACE = 'aruba_slr01_camfeedsv1'
-CASS_TABLE_PREFIX = 'camfeeds'
+CASS_TABLE_PREFIX = 'camfeeds_sv2'
 CASS_TABLE_DATE_FORMAT = '%Y%m%d'
 # The dummy_count below is added to be able to have the same detect_time 
 # in multiple rows.  This is a common occurance becasue multiple objects will

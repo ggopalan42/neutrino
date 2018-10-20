@@ -53,7 +53,7 @@ TABLE_COLUMNS_SV2 = ('( detect_time100 bigint, '
                        'endX float, '
                        'startY float, '
                        'endY float, '
-                       'PRIMARY KEY ((stream_group_name, stream_name) detect_time100) '
+                       'PRIMARY KEY ((stream_group_name, stream_name), detect_time100) '
                        ') WITH CLUSTERING ORDER BY (detect_time100 ASC);' 
                       )
 

@@ -113,7 +113,7 @@ class cassandra_utils():
         self.session.set_keyspace(keyspace)
 
     def create_table(cass, ks_name, table_name, 
-                                          table_columns=TABLE_COLUMNS_1p1p0):
+                                          table_columns=TABLE_COLUMNS_SV2):
         ''' Create specified table in keyspace ks_name if it does not exist '''
         cmd = "CREATE TABLE IF NOT EXISTS {ks_name}.{table_name} {cols}".format(
                                        ks_name=ks_name, table_name=table_name,

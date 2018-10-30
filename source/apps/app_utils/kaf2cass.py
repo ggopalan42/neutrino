@@ -35,7 +35,16 @@ PC_DF_SAVE_COUNT = 100    # Save the DF every PC_DF_SAVE_COUNT rows
 # Cassandra constants: Again lotsa magic variables
 CASS_HOSTNAME = '127.0.0.1'       # Localhost. Later move this to a config
 CASS_KEYSPACE = 'aruba_slr01_camfeedsv1'
-CASS_TABLE_PREFIX = 'camfeeds_sv2'
+# CASS_TABLE_PREFIX History:
+#     - camfeeds: This is original camfeeds with detect_time100 as the key
+#     - camfeeds_sv2: This is schema version 2 with the 
+#           'PRIMARY KEY ((stream_group_name, stream_name), detect_time100) '
+#       but because of the code bug, sv2p1 is being created.
+#     - camfeeds_sv2p1: This has the same schema as camfeeds_sv2 but because of
+#                       a code bug, a new version (sv2p1 = schema version 2.1)
+#                       has been created
+ 
+CASS_TABLE_PREFIX = 'camfeeds_sv2p1'
 CASS_TABLE_DATE_FORMAT = '%Y%m%d'
 # The dummy_count below is added to be able to have the same detect_time 
 # in multiple rows.  This is a common occurance becasue multiple objects will

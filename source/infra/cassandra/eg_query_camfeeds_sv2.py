@@ -26,13 +26,13 @@ cqlsh:aruba_slr01_camfeedsv1> select * from camfeeds_sv2_20181019 where stream_g
 # Query constants
 NUM_ENTRIES = 20
 KEYSPACE = 'aruba_slr01_camfeedsv1'
-TABLE_NAME = 'camfeeds_sv2_20181023'
+TABLE_NAME = 'camfeeds_sv2p1_20181107'
 STREAM_GROUP_NAME = 'Aruba_SLR01_Cams'
-STREAM_NAME = 'bldg_d_f2_conf_archimedes'
+STREAM_NAME = 'bldg_d_f4_helpdesk'
 
 
-START_TIME = '2018-10-23_18:00:00-0700'
-END_TIME = '2018-10-23_19:00:00-0700'
+START_TIME = '2018-11-07_08:00:00-0700'
+END_TIME = '2018-11-07_12:09:00-0700'
 
 
 COLUMN_NAMES = 'detect_time100 dummy_count detect_time_hr confidence found stream_group_name stream_name msg_format_version startX endX startY endY'
@@ -83,9 +83,13 @@ def main():
     # Now do the query
     ret_dict = cass_query_to_dict(cass, STREAM_GROUP_NAME, STREAM_NAME, 
                                                        START_TIME, END_TIME)
+    '''
     print('Ret dict: {}'.format(ret_dict))
     for d in ret_dict:
         print(d)
+    '''
+
+    print(len(list(ret_dict)))
 
     cass.cleanup()
 

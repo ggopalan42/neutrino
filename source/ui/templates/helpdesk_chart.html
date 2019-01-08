@@ -1,0 +1,71 @@
+{% block page_content %}
+<h1>Helpdesk Usage</h1>
+<!-- bar chart canvas element -->
+<canvas id="helpdeskChart" width="600" height="400"></canvas>
+<p id="caption">This chart is displaying Helpdesk Usage</p>
+
+<script>
+   // bar chart data
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+             {% endfor %}],
+   datasets : [
+    {
+        fillColor:   "rgba(250,100,100,0.2)",
+        strokeColor: "rgba(250,100,100,1)",
+        pointColor:  "rgba(250,100,100,1)",
+        label: 'Staff',
+        data : [{% for staff in staff_counts %}
+                    {{staff}},
+                {% endfor %}]
+    },
+    {
+        fillColor:   "rgba(151,187,205,0.2)",
+        strokeColor: "rgba(151,187,205,1)",
+        pointColor:  "rgba(151,187,205,1)",
+        label: 'Employee',
+        data : [{% for employee in employee_counts %}
+                    {{employee}},
+                {% endfor %}]
+    }
+    ]
+  }
+
+  // Set options: legend, title etc.
+  var my_options =  {
+            title: {
+              display: true,
+              text: 'Dim'
+            },
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    fontColor: 'rgb(255, 99, 132)',
+                    label: 'Dim'
+                }
+            }
+        }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("helpdeskChart").getContext("2d");
+ 
+   steps = {{ scale_steps }}
+   max = {{ count_max }}
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleOverride: true,
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true,
+        options: my_options
+   });
+ 
+
+</script>
+{% endblock %}

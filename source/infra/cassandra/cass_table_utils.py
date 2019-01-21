@@ -64,12 +64,14 @@ def parse_args():
        description='This script adds or deletes a table to/from a keyspace',
        usage='./cass_ks_utils.py [-a|-d] <table-name> -k <keyspace-name>')
 
-    ap.add_argument("-k", "--ks-name", required=True,
+    ap.add_argument("-k", "--ks-name", default='aruba_slr01_camfeedsv1',
             help="Keyspace name table to be added to")
     ap.add_argument("-a", "--add-table",
             help="Table name to add")
     ap.add_argument("-d", "--delete-table",
             help="Table name to delete")
+    ap.add_argument("-l", "--list-tables", action='store_true',
+            help="List all tables in keyspace")
     args = vars(ap.parse_args())
 
     return args
@@ -89,6 +91,11 @@ def main():
         logging.info('Deleting Table {} from Keyspace {}'
                                 .format(args['delete_table'], args['ks_name']))
         cass.delete_table(args['ks_name'], args['delete_table'])
+    elif args['list_tables']:
+        logging.info('Listing tables from Keyspace {}'
+                                .format(args['ks_name']))
+        tables_list = cass.get_tables_in_keyspace(args['ks_name'])
+        print(tables_list)
     else:
         logging.error('Need to specify either add or delete option')
     cass.cleanup()

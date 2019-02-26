@@ -1,9 +1,13 @@
+import traceback
+import sys
+
 from flask import Flask, render_template, redirect, url_for
 # from flask import Markup
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, RadioField
+from wtforms import StringField, SubmitField, RadioField, DateField, DateTimeField
 from wtforms.validators import DataRequired
+
 
 # Local imports
 import query_cass
@@ -20,8 +24,8 @@ RADIO_FIELDS = [('last_week', ' Last Week'),
 # Charting constants
 NUM_BUCKETS = 10
 
-DEFAULT_START_DATE = '2018-12-17_08:00:00'
-DEFAULT_END_DATE = '2018-12-17_09:00:00'
+DEFAULT_START_TIME = '2018-12-17_08:00:00'
+DEFAULT_END_TIME = '2018-12-17_09:00:00'
 
 PACIFIC_TZ = 'US/Pacific'
 
@@ -72,17 +76,30 @@ def helpdesk():
     form = DaterangeForm()
 
     # Need to get some default values into the bar chart plotting vars
+    start_time, end_time = DEFAULT_START_TIME, DEFAULT_END_TIME
     (labels, staff_counts, employee_counts) =     \
-        cu.get_chart_params(DEFAULT_START_DATE, DEFAULT_END_DATE)
+        cu.get_chart_params(start_time, end_time)
     # date_range_str needs to be initialized to something before render
     display_message = 'Please choose an option from below'
+    optional_message = ('Please select an option from above. '
+                        'Default Start/End times being used')
     if form.validate_on_submit():
         radio_button = form.radio_button.data
+        optional_message = None
         if radio_button == 'custom_date':
-            start_date = form.start_date.data
-            end_date = form.end_date.data
+            start_time = form.start_date.data
+            end_time = form.end_date.data
+
+            # Validate user inputs: start and end times
+            msg = cu.validate_start_end(start_time, end_time)
+            if msg:
+                return render_template('date_format_error.html', message=msg)
+            msg = cu.validate_time_format(end_time)
+            if msg:
+                return render_template('date_format_error.html', message=msg)
+
             (labels, staff_counts, employee_counts) =     \
-                cu.get_chart_params(start_date, end_date)
+                cu.get_chart_params(start_time, end_time)
         else:
             start_time, end_time = cu.selecttime_to_start_end(radio_button,
                                                               PACIFIC_TZ)
@@ -90,18 +107,44 @@ def helpdesk():
                 cu.get_chart_params(start_time, end_time)
             display_message = ('Showing for time range: {}'
                                .format(radio_button))
-
     counts = zip(staff_counts, employee_counts)
     count_max = max(max(staff_counts), max(employee_counts))
     scale_steps = 12
     print(labels)
+
+    # Add day to start and end times
+    st_time_day = '{} ({})'.format(start_time, cu.get_day_from_date(start_time))
+    end_time_day = '{} ({})'.format(end_time, cu.get_day_from_date(end_time))
+
     return render_template('helpdesk.html', form=form,
                            display_message=display_message,
+                           optional_message=optional_message,
                            staff_counts=staff_counts,
                            employee_counts=employee_counts, labels=labels,
-                           count_max=count_max, scale_steps=scale_steps)
+                           count_max=count_max, scale_steps=scale_steps,
+                           start_time=st_time_day, end_time=end_time_day,)
 
 
 @application.route('/room_occ')
 def room_occ():
     return render_template('room_occ.html')
+
+
+# Error handling
+@application.errorhandler(404)
+def page_not_found(e):
+    return render_template('error_404.html'), 404
+
+
+@application.errorhandler(500)
+def internal_server_error(e):
+    return render_template('error_500.html'), 500
+
+
+@application.errorhandler(Exception)
+def exception_handler(e):
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    err = str(e)
+    tb = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    # tb = ''.join(tb_list)
+    return render_template('hd_exception_handler.html', err=err, tb=tb), 500

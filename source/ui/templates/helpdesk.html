@@ -8,7 +8,10 @@
     <h1>Helpdesk</h1>
     <h4>{{ display_message }}</h4>
 </div>
-{{ wtf.quick_form(form) }}
+<div>
+	{{ wtf.quick_form(form) }}
+</div>
+
 <div>
     {% include "helpdesk_chart.html" %}
     <!-- Not sure why I need to add this, but otherwise the bottom of the

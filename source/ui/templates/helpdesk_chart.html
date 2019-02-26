@@ -1,8 +1,15 @@
 {% block page_content %}
 <h1>Helpdesk Usage</h1>
+{% if optional_message %}
+    <p> <b>Note:</b> {{ optional_message }} </p>
+{% endif %}
+<p id="caption"> Helpdesk Usage between : <b>{{ start_time }}</b> and 
+   <b>{{ end_time }}</b> </p>
 <!-- bar chart canvas element -->
-<canvas id="helpdeskChart" width="600" height="400"></canvas>
-<p id="caption">This chart is displaying Helpdesk Usage</p>
+<canvas id="helpdeskChart" width="800" height="400"></canvas>
+<p> Y-axis: Number of person-seconds </p>
+<p> Legend: Red = Staff, Blue = Employee </p>
+
 
 <script>
    // bar chart data
@@ -34,6 +41,35 @@
 
   // Set options: legend, title etc.
   var my_options =  {
+            responsive: true,
+            title: {
+                display: true,
+                text: 'Test Title'
+            }
+        }
+
+  var my_options1 =  {
+            responsive: true,
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Month'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Value'
+                    }
+                }]
+            }
+        }
+
+  var my_options2 =  {
+            responsive: true,
             title: {
               display: true,
               text: 'Dim'

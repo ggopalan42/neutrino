@@ -1,17 +1,14 @@
 #! /usr/bin/env python
 # Note: This script is primarily for testing insertion into a table
 
-import os
-import sys
+# import sys
 import time
 import logging
 
 import pandas as pd
 
-from cassandra.query import dict_factory
-from cassandra.query import SimpleStatement
-
-from itertools import chain
+# from cassandra.query import dict_factory
+# from cassandra.query import SimpleStatement
 
 # Local imports
 import cass_utils as cu
@@ -19,9 +16,12 @@ import cass_utils as cu
 # Set logging level
 logging.basicConfig(level=logging.INFO)
 
-# Constants. Lots of magic crap. Oh, I'm going to pay for this . . . 
+# Constants. Lots of magic crap. Oh, I'm going to pay for this . . .
 HOSTNAME = '127.0.0.1'       # Localhost. Later move this to a config
 CASS_HR_TIME_FORMAT = '%Y-%m-%d_%H:%M:%S%z'
+COLUMN_NAMES = ['stream_group_name', 'stream_name', 'detect_time100',
+                'confidence', 'detect_time_hr', 'endx', 'endy', 'found',
+                'msg_format_version', 'startx', 'starty']
 
 # Query constants
 NUM_ENTRIES = 20
@@ -34,15 +34,16 @@ STREAM_NAME = 'bldg_d_f4_helpdesk'
 
 # cqlsh Query example
 '''
-cqlsh:aruba_slr01_camfeedsv1> select * from camfeeds_sv2_20181019 where stream_group_name='Aruba_SLR01_Cams' and stream_name='bldg_d_f2_conf_archimedes' and detect_time100>153999028474592500 and detect_time100<153999028527509899;
+cqlsh:> select * from camfeeds_sv2_20181019
+        where stream_group_name='Aruba_SLR01_Cams' and
+        stream_name='bldg_d_f2_conf_archimedes' and
+        detect_time100>153999028474592500 and
+        detect_time100<153999028527509899;
 '''
 
 
-START_TIME = '2018-11-09_08:00:00-0700'
-END_TIME = '2018-11-09_09:00:00-0700'
-
-
-COLUMN_NAMES = 'detect_time100 dummy_count detect_time_hr confidence found stream_group_name stream_name msg_format_version startX endX startY endY'
+START_TIME = '2019-02-07_08:00:00'
+END_TIME = '2019-02-07_09:00:00'
 
 
 def hr_time_to_epoch(hr_time):
@@ -83,16 +84,45 @@ def make_query_cmd(table_name, stream_group_name, stream_name,
     return qcmd
 
 
+def check_table_exists(cass, start_time):
+    ''' Check for existance of table. Return True if it exists.
+        Else return False '''
+
+    # Start & End times are in PST format. Need to add a "-0700" to them
+    # to make them UTC. TBD: I know this is a fixed time zone. This is all
+    # that is supported now.
+    start_time_hr = '{}-0700'.format(start_time)
+
+    # Get table name from start/emd times. For now, make an assumption that
+    # queries are only within one day, so table name can be figured out
+    # from either start time hr or end time hr
+    table_name = table_name_from_date(start_time_hr)
+
+    # Set keyspaces to populate the class cassandra_utils keyspaces.
+    # This step should not be needed, but . . . moving fwd . . .
+    ks_list, _ = cass.get_keyspaces()
+    tables_list = cass.get_tables_in_keyspace(KEYSPACE)
+    return True if table_name in tables_list else False
+
+def make_empty_dataframe():
+    ''' Return an empty dataframe with the correct columns.
+
+        This is sometimes needed, for example when a table does not exist
+    '''
+    return pd.DataFrame(columns=COLUMN_NAMES)
+
+
+
 def cass_query_to_dict(cass, stream_group_name, stream_name,
                        start_time_hr, end_time_hr):
     ''' Make the query between start and endtimes and return results as dict
     '''
     # Move this to utils
-    # The code for this was obtained form: 
+    # The code for this was obtained form:
     # https://datastax.github.io/python-driver/api/cassandra/query.html
 
     # Start & End times are in PST format. Need to add a "-0700" to them
-    # to make them UTC. I know this is a fixed time zone. This is all
+    # to make them UTC. TBD: I know this is a fixed time zone. This is all
     # that is supported now.
     start_time_hr = '{}-0700'.format(start_time_hr)
     end_time_hr = '{}-0700'.format(end_time_hr)
@@ -109,7 +139,7 @@ def cass_query_to_dict(cass, stream_group_name, stream_name,
     # cass.session.row_factory = dict_factory
     qcmd = make_query_cmd(table_name, stream_group_name, stream_name,
                           start_epoch, end_epoch)
-    print(qcmd)
+    # print(qcmd)
 
     # statement = SimpleStatement(qcmd, fetch_size=None)
 
@@ -132,6 +162,14 @@ def cass_query(start_time, end_time):
     # TBD: Magic number alert
     cass.session.default_fetch_size = 5000
 
+    # Before making the query, check that the table exists. If it does not
+    # exists, create an empty data frame and return it
+    # TBD: This should be handled better or more elagently
+    table_exists = check_table_exists(cass, start_time)
+    if not table_exists:
+        # return an empty dataframe
+        return make_empty_dataframe()
+
     # Now do the query
     ret_dict_iter = cass_query_to_dict(cass, STREAM_GROUP_NAME, STREAM_NAME,
                                        start_time, end_time)
@@ -144,7 +182,7 @@ def cass_query(start_time, end_time):
         # interest into person_df
         tmp_df = ret_dict_iter._current_rows
         person_df = person_df.append(tmp_df[tmp_df.found == 'person'])
-        print(len(person_df))
+        # print(len(person_df))
         ret_dict_iter.fetch_next_page()
     # Now append the last remaining rows of the fetch (otherwise df will
     # always be multiple of cass.session.default_fetch_size)
@@ -170,9 +208,13 @@ def main():
     cass.set_session_keyspace(KEYSPACE)
 
     # Now do the query
-    ret_dict = cass_query_to_dict(cass, STREAM_GROUP_NAME, STREAM_NAME, 
-                                  START_TIME, END_TIME)
-    print(len(list(ret_dict)))
+    # ret_dict = cass_query_to_dict(cass, STREAM_GROUP_NAME, STREAM_NAME, 
+    #                               START_TIME, END_TIME)
+
+    person_df = cass_query(START_TIME, END_TIME)
+    print(person_df.columns)
+    print(person_df.head())
+    # print(len(list(ret_dict)))
 
     cass.cleanup()
 

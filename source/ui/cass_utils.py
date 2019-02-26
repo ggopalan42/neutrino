@@ -86,7 +86,7 @@ class cassandra_utils():
         self.system_ks_dict = {}
         self.db_ks_dict = {}
         for ks, ks_obj in self.cluster.metadata.keyspaces.items():
-            logging.info('Setting up keyspace: {}'.format(ks))
+            logging.debug('Setting up keyspace: {}'.format(ks))
             setattr(self, ks, ks_obj)
             if ks in SYSTEM_KS:
                 self.system_ks_list.append(ks)
@@ -105,7 +105,7 @@ class cassandra_utils():
         ks_obj = getattr(self, keyspace)
         # roll through the ks_obj tables dict and set things up
         for table_name, table_obj in ks_obj.tables.items():
-            logging.info('Setting up for table: {} in keyspace: {}'
+            logging.debug('Setting up for table: {} in keyspace: {}'
                          .format(table_name, keyspace))
             table_list.append(table_name)
             setattr(ks_obj, table_name, table_obj)

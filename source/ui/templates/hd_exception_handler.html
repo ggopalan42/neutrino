@@ -1,0 +1,17 @@
+{% extends "neutrino_base1.html" %}
+
+{% block title %}Neutrino - Helpdesk Application Error{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Neutrino - Helpdesk Application Error</h1>
+    <p> Helpdesk Application encountered an error. Error details
+        are below. Please copy and pase information below when
+        reporting errors </p>
+    <h3>Reported Error is: {{ err }}</h3>
+    <h3>Traceback is:</h3>
+    {% for item in tb %}
+        <p> {{ item }} </p>
+    {% endfor %}
+</div>
+{% endblock %}

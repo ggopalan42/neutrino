@@ -104,7 +104,8 @@ class cassandra_utils():
         # get the keyspace attribute
         ks_obj = getattr(self, keyspace)
         # roll through the ks_obj tables dict and set things up
-        for table_name, table_obj in ks_obj.tables.items():
+        tables_dict = ks_obj.tables.items()
+        for table_name, table_obj in tables_dict:
             logging.debug('Setting up for table: {} in keyspace: {}'
                          .format(table_name, keyspace))
             table_list.append(table_name)

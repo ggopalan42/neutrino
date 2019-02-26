@@ -94,8 +94,10 @@ def main():
     elif args['list_tables']:
         logging.info('Listing tables from Keyspace {}'
                                 .format(args['ks_name']))
+        ks_list, _ = cass.get_keyspaces()
         tables_list = cass.get_tables_in_keyspace(args['ks_name'])
-        print(tables_list)
+        for t in sorted(tables_list):
+            print(t)
     else:
         logging.error('Need to specify either add or delete option')
     cass.cleanup()

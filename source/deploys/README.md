@@ -9,3 +9,11 @@ This is where all deploy scripts reside. These scripts are used to setup various
     - Login to server and change the script to be executable
     - Run the script
     - Good luck! 
+
+## docker:
+    - This dir contains a number of sub dirs that each will build an image.
+    - These images are then brought up and run via configurations in the local_docker_deploys dir (in other words, this is the dir that contains the orchestration parts)
+
+
+## local_docker_deploys:
+     - This contains a number of docker compose yaml files that run several docker containers locally (that is local server) that is part of the neutrino application

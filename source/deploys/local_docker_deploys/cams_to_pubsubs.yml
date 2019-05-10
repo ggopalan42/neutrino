@@ -1,0 +1,23 @@
+# This config will run a set of containers that connect to 
+# various cameras and publish the resulting images to a pub/sub. 
+# Other containers can then subscribe to it.
+version: "3"
+services:
+    cams_to_pubsub:
+        build:
+            context: ../docker/cam2pub
+            dockerfile: ./Dockerfile
+        container_name: cam2pub
+        image: cam2pub
+        restart: unless-stopped
+        logging:
+            driver: json-file
+            options:
+                max-size: 50m
+#       ports:
+#           - "8888:8888"
+#           - "6006:6006"
+#       volumes:
+#           - ../:/home/devel/handson-ml
+#       command: /opt/conda/bin/jupyter notebook --ip='0.0.0.0' --port=8888 --no-browser
+

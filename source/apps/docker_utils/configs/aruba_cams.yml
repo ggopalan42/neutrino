@@ -1,0 +1,187 @@
+cams_name: aruba_cams
+
+defaults:
+    creds:
+        aruba_axis1:     # The 1 here simply there if we needed more def creds
+            user: root
+            pw: 'cm9vdA=='
+            # The "enc_type" here is more obfscutaion type. pw cannot truly
+            # be "hidden" unless the application (Axis cameras here) support
+            # some type of auth. I have not found any so far
+            enc_type: base64
+
+    stream_group_name: Aruba_SLR01_Cams
+
+# Cams fields explained:
+#   - cam_name:    -> Name of camera. Internal use and may appear in logs
+#       valid:         -> If set, this entire cam config is valid and
+#                         will be processed
+#       display_name:  -> Name displayed when showing images. 
+#                         Either in cv2.imshow or on web interface
+#       description:   -> A full, wordy description of the camera
+#       stream_name:   -> name of this stream. This (unique) nme is 
+#                         used as a column in the database and also
+#                         as part of the topic
+#       cam_type:      -> Currently supported cam types:
+#                            1) local: means its connect to local USB port
+#                            1) axis_vapix_P3364
+#       cam_proto:     -> proto to be used (http, https, etc) 
+#       cam_hostname:  -> Hostname or IP addr 
+#                         This is also the USB number if camera is local
+#       cam_uri:       -> URI used to access video of the cam
+#       cam_creds:     -> If using default creds, specify from default list
+#       write_to_file: -> If set, will also write to file
+#       read_from_file: -> If set, will read from file instead of from cam
+#       display_image:  -> If set, will show the image with a cv2.imshow
+#       display_predictions -> If set, will draw a box around the detected obj
+#                              and name it with prediction confidence level
+#       key:            -> Key. Maybe used as kafka partition. Not sure
+
+
+cams:
+    - slr01_bldg_d_f1_elevators:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 1 Elevators
+        description: "Aruba, SC, Main Building, Floor 1, Elevators"
+        stream_name: bldg_d_f1_elevators
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.18
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        # read_from_file: video.mjpg
+        # write_to_file: vid1.mjpg
+        display_image: False
+        display_predictions: False
+        key: 0
+
+    - slr01_bldg_d_f1_rear_lobby_entrance:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 1 Rear Lobby Entrance
+        description: "Aruba, SC, Main Building, Floor 1, Rear Lobby Entrance"
+        stream_name: bldg_d_f1_rear_lobby_entrance
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.17
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        # read_from_file: slr01_bldg_d_f1_rear_lobby_entrance_lt1.mjpg
+        # write_to_file: vid2.mjpg
+        display_image: False
+        display_predictions: False
+        key: 0
+
+    - slr01_bldg_d_f2_elevators:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 2 Elevators
+        description: "Aruba, SC, Main Building, Floor 2, Elevators"
+        stream_name: bldg_d_f2_elevators
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.30
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        # read_from_file: None
+        # write_to_file: None
+        display_image: False
+        display_predictions: False
+        key: 0
+
+    # Using this for ALE integration testing
+    - slr01_bldg_d_f3_elevators:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 3 Elevators
+        description: "Aruba, SC, Main Building, Floor 3, Elevators"
+        stream_name: bldg_d_f3_elevators
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.34
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        # read_from_file: loc_corr_f3_elevators_cam_r1.mjpg
+        # write_to_file: loc_corr_f3_elevators_cam_r1.mjpg
+        display_image: False
+        display_predictions: False
+        key: 0
+
+    - slr01_bldg_d_f4_elevators:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 4 Elevators
+        description: "Aruba, SC, Main Building, Floor 4, Elevators"
+        stream_name: bldg_d_f4_elevators
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.42
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        # read_from_file: None
+        # write_to_file: None
+        display_image: False
+        display_predictions: False
+        key: 0
+
+    - slr01_bldg_d_f5_elevators:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 5 Elevators
+        description: "Aruba, SC, Main Building, Floor 5, Elevators"
+        stream_name: bldg_d_f5_elevators
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.47
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        # read_from_file: None
+        # write_to_file: None
+        display_image: False
+        display_predictions: False
+        key: 0
+
+    - slr01_bldg_d_f1_s_lobby_rnd:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 1 S Lobby to R&D
+        description: "Aruba, SC, Building D, Floor 1, South Common Lobby from R&D"
+        stream_name: bldg_d_f1_s_lobby_rnd
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.53
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        # read_from_file: None
+        # write_to_file: None
+        display_image: False
+        display_predictions: False
+        key: 0
+
+    - slr01_bldg_d_f4_helpdesk:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 4 Helpdesk
+        description: "Aruba, Santa Clara Campus, Building D, Floor 4, Helpdesk"
+        stream_name: bldg_d_f4_helpdesk
+        cam_type: axis_vapix_P3364
+        cam_proto: http
+        cam_hostname: 192.168.128.39
+        cam_uri: axis-cgi/mjpg/video.cgi
+        cam_creds: aruba_axis1
+        # read_from_file: helpdesk_f4_chairs_only_0825.mjpg
+        # write_to_file: helpdesk_f4_0828.mjpg
+        display_image: False
+        display_predictions: False
+        key: 0
+
+    # Conference Rooms
+    - slr01_bldg_d_f2_archimedes:
+        valid: False
+        display_name: Aruba SLR01 Bldg D Floor 2 Archimedes
+        description: "Aruba, SC, Building D, Floor 2, Archimedes"
+        stream_name: bldg_d_f2_conf_archimedes
+        cam_type: local
+        cam_proto: NA
+        cam_hostname: 0          # 0 here refers to local USB bus #
+        cam_uri: NA
+        cam_creds: NA
+        # read_from_file: archimedes_0824_1641.mjpg
+        # write_to_file: archimedes_0824_1641.mjpg
+        display_image: False
+        display_predictions: False
+        key: 0
+

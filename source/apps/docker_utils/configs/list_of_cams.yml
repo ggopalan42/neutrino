@@ -1,0 +1,2 @@
+cams_list:            # List of cam filenames to load
+    - aruba_cams.yml

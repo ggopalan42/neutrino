@@ -1,13 +1,21 @@
+# syntax=docker/dockerfile:experimental
+
 FROM nbase_py37_opencv3
 LABEL author="ggopalan"
 LABEL project="neutrino"
 MAINTAINER Giri Gopalan <ggopalan42@gmail.com>
 
-# RUN pip install <something>  # Consolidate as each RUN adds a layer
+# Prepare for cloning private repos from git.
+# download public key for github.com
+RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+# clone private repository
+RUN --mount=type=ssh git clone git@github.com:ggopalan42/neutrino.git /opt/neutrino
+RUN --mount=type=ssh git clone git@github.com:ggopalan42/pylibs.git /opt/pylibs
+# RUN --mount=type=ssh git clone git@github.com:ggopalan42/vtun.git
+
 
 # ENTRYPOINT ["/bin/echo", "Hello World!"]
-COPY neutrino/* /opt/neutrino/
-
+# COPY neutrino/* /opt/neutrino/
 
 # ENTRYPOINT ["python", "hello.py"]
 # ENTRYPOINT ["ls"]

@@ -8,6 +8,8 @@ services:
   cam2pub_1:
     image: local/cam2pub:0.1
     container_name: cam2pub_1
+    environment:
+        - STREAM_NAME=cam2pub_1
     networks:
       - network_cam2pub_1
     deploy:
@@ -17,6 +19,8 @@ services:
   cam2pub_2:
     image: local/cam2pub:0.1
     container_name: cam2pub_2
+    environment:
+        - STREAM_NAME=cam2pub_2
     networks:
       - network_cam2pub_2
     deploy:

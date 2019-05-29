@@ -8,14 +8,17 @@ MAINTAINER Giri Gopalan <ggopalan42@gmail.com>
 # Prepare for cloning private repos from git.
 # download public key for github.com
 RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
-# clone private repository
+# ~lone private repos: neutrino and pylibs
 RUN --mount=type=ssh git clone git@github.com:ggopalan42/neutrino.git /opt/neutrino
 RUN --mount=type=ssh git clone git@github.com:ggopalan42/pylibs.git /opt/pylibs
-# RUN --mount=type=ssh git clone git@github.com:ggopalan42/vtun.git
 
+# Install required packages
+RUN pip install pip pyyaml
+
+# Set env variables
+ENV PYTHONPATH="/opt"
 
 # ENTRYPOINT ["/bin/echo", "Hello World!"]
-# COPY neutrino/* /opt/neutrino/
 
 # ENTRYPOINT ["python", "hello.py"]
 # ENTRYPOINT ["ls"]

@@ -1,0 +1,46 @@
+# This is a config solely for the purpose of testing
+group_name: Test_Cams
+
+defaults:
+# Cams fields explained:
+#   - cam_name:    -> Name of camera. Internal use and may appear in logs
+#       valid:         -> If set, this entire cam config is valid and
+#                         will be processed
+#       display_name:  -> Name displayed when showing images. 
+#                         Either in cv2.imshow or on web interface
+#       description:   -> A full, wordy description of the camera
+#       stream_name:   -> name of this stream. This (unique) nme is 
+#                         used as a column in the database and also
+#                         as part of the topic
+#       cam_type:      -> Currently supported cam types:
+#                            1) local: means its connect to local USB port
+#                            1) axis_vapix_P3364
+#       cam_proto:     -> proto to be used (http, https, etc) 
+#       cam_hostname:  -> Hostname or IP addr 
+#                         This is also the USB number if camera is local
+#       cam_uri:       -> URI used to access video of the cam
+#       cam_creds:     -> If using default creds, specify from default list
+#       write_to_file: -> If set, will also write to file
+#       read_from_file: -> If set, will read from file instead of from cam
+#       display_image:  -> If set, will show the image with a cv2.imshow
+#       display_predictions -> If set, will draw a box around the detected obj
+#                              and name it with prediction confidence level
+#       key:            -> Key. Maybe used as kafka partition. Not sure
+
+
+cams:
+    - test_cam_01:
+        valid: False
+        display_name: Test Cam 01
+        description: "This is test camera 01"
+        stream_name: test_cam_01
+        cam_type: test
+        cam_proto: test
+        cam_hostname: 192.168.128.18
+        cam_uri: test
+        cam_creds: test
+        # read_from_file: video.mjpg
+        # write_to_file: vid1.mjpg
+        display_image: False
+        display_predictions: False
+        key: 0

@@ -1,4 +1,4 @@
-cams_name: aruba_cams
+group_name: Aruba_SLR01_Cams
 
 defaults:
     creds:
@@ -9,8 +9,6 @@ defaults:
             # be "hidden" unless the application (Axis cameras here) support
             # some type of auth. I have not found any so far
             enc_type: base64
-
-    stream_group_name: Aruba_SLR01_Cams
 
 # Cams fields explained:
 #   - cam_name:    -> Name of camera. Internal use and may appear in logs
@@ -35,7 +33,7 @@ defaults:
 #       display_image:  -> If set, will show the image with a cv2.imshow
 #       display_predictions -> If set, will draw a box around the detected obj
 #                              and name it with prediction confidence level
-#       key:            -> Key. Maybe used as kafka partition. Not sure
+#       key:            -> Key. For future. Maybe used as kafka part. Not sure
 
 
 cams:
@@ -178,7 +176,7 @@ cams:
         cam_proto: NA
         cam_hostname: 0          # 0 here refers to local USB bus #
         cam_uri: NA
-        cam_creds: NA
+        cam_creds: USB
         # read_from_file: archimedes_0824_1641.mjpg
         # write_to_file: archimedes_0824_1641.mjpg
         display_image: False

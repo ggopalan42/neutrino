@@ -215,11 +215,12 @@ class cam_groups():
 
 class all_cams_config():
     ''' This class holds the configs and defaults of all camera groups '''
-    def __init__(self):
+    def __init__(self, config_dir=CONFIG_DIR, list_of_cams=LIST_OF_CAMS):
         self.cam_grp_names = []      # List of cam group names
         self.cam_grp_config = {}     # Dict that holds cam group objects
         # Load the camera configs
-        self._load_all_cam_configs(CONFIG_DIR, LIST_OF_CAMS)
+        self._load_all_cam_configs(config_dir, list_of_cams)
+
 
     # Private methods
     def _load_all_cam_configs(self, configs_dir, list_of_cams_fn):

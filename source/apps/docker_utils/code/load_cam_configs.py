@@ -215,32 +215,27 @@ class cam_groups():
 
 class all_cams_config():
     ''' This class holds the configs and defaults of all camera groups '''
-    def __init__(self, config_dir=CONFIG_DIR, list_of_cams=LIST_OF_CAMS):
+    def __init__(self, all_cams_config_dict):
         self.cam_grp_names = []      # List of cam group names
         self.cam_grp_config = {}     # Dict that holds cam group objects
         # Load the camera configs
-        self._load_all_cam_configs(config_dir, list_of_cams)
+        self.all_cams_config_dict = all_cams_config_dict
+        self._load_all_cam_configs()
 
 
     # Private methods
-    def _load_all_cam_configs(self, configs_dir, list_of_cams_fn):
+    def _load_all_cam_configs(self):
         ''' Load the configs of all camera groups from list_of_cams_fn
 
-            Arguments:
-                configs_dir: Location of the camera configurations
-                list_of_cams_fn: YAML file that contains list of camera groups
+            Arguments (implicit via self):
+                all_cams_config_dict: Dict returned by call to 
+                               load_all_cams_config. That is a giant dict
+                                that contains config for all cams
 
             Return:  The class itself
         ''' 
         # First load the cams list
-        ffn = os.path.join(configs_dir, list_of_cams_fn)
-        logging.info(f'Loading all camps list from: {ffn}')
-        self.cams_list_dict = file_utils.yaml2dict(ffn)
-        for cam_grp_yaml_fn in self.cams_list_dict['cams_list']:
-            ffn = os.path.join(configs_dir, cam_grp_yaml_fn)
-                   # Load the camera group config
-            logging.info(f'Loading cam groups config: {ffn}')
-            group_dict = file_utils.yaml2dict(ffn)
+        for cam_group, group_dict in self.all_cams_config_dict.items():
 
             # Append the cam group name to the list
             cam_group_name = group_dict['group_name']
@@ -265,7 +260,82 @@ class all_cams_config():
             cam_grp_config.release_group_cams()
 
 
+def load_all_cams_config():
+    ''' This will load the camera config into a giant big dictionary
+        and return it. 
+
+        Arguments: None
+
+        Returns: Giant dict with all camera configs
+    '''
+
+    # Setup some stuff
+    giant_config_dict = defaultdict(list)
+    configs_dir = CONFIG_DIR 
+    list_of_cams_fn = LIST_OF_CAMS 
+
+    ffn = os.path.join(configs_dir, list_of_cams_fn)
+    logging.info(f'Loading all camps list from: {ffn}')
+    cams_list_dict = file_utils.yaml2dict(ffn)
+    for cam_grp_yaml_fn in cams_list_dict['cams_list']:
+        ffn = os.path.join(configs_dir, cam_grp_yaml_fn)
+               # Load the camera group config
+        logging.info(f'Loading cam groups config: {ffn}')
+        # Read in the cam group configs and get the group name
+        group_dict = file_utils.yaml2dict(ffn)
+        cam_group_name = group_dict['group_name']
+        # Now set it in the giant_config_dict
+        giant_config_dict[cam_group_name] = group_dict
+
+    return giant_config_dict
+
+
+def docker_load_all_cams_config():
+    ''' This is the method that docker will call when loading the config
+        via docker. This will load the camera config into a giant big
+        dictionary. 
+
+        It will then see if an env variable called
+        NEUTRINO_VALID_CAMS exists. If it does, it will go through
+        the comma-separated values of this variable and set all of these
+        cameras to valid. The cameras to be set as valid should be in
+        the format: CAM_GROUP_NAME:CAM_NAME, CAM_GROUP_NAME:CAM_NAME, ...
+
+        If the env variable NEUTRINO_VALID_CAMS does NOT exist, the giant
+        config dict is returned as is
+
+        Arguments: None
+
+        Returns: Giant dict with all camera configs
+    '''
+
+    giant_config_dict = load_all_cams_config()
+    # Now check if env variable NEUTRINO_VALID_CAMS exists and setup
+    # specified cams to valid
+    if 'NEUTRINO_VALID_CAMS' in os.environ.keys():
+        cams_to_valid_list = os.environ['NEUTRINO_VALID_CAMS'].split(',')
+        cams_to_valid_list = [x.strip() for x in cams_to_valid_list]
+        logging.info('Env variable NEUTRINO_VALID_CAMS is set')
+        for cam_to_valid in cams_to_valid_list:
+            logging.info(f'Setting camera {cam_to_valid} to valid')
+            cam_group, cam_name = cam_to_valid.split(':')
+            cams_list = giant_config_dict[cam_group]['cams']
+            # Since the individual cams are specified as a list in YAML,
+            # we need to go through them one by one and flip the matching ones
+            for cam_cfg in cams_list:
+                if cam_name in cam_cfg.keys():
+                    cam_cfg[cam_name]['valid'] = True
+    else:
+        logging.info('Env variable NEUTRINO_VALID_CAMS is not set. ' 
+                     'Leaving camera config dict unchanged')
+    return giant_config_dict
+
+
 if __name__ == '__main__':
-    cam_conf = all_cams_config()
+    cam_config_dict = load_all_cams_config()
+    # cam_config_dict = docker_load_all_cams_config()
+    cam_conf = all_cams_config(cam_config_dict)
     cam_conf.connect_to_all_cams()
     cam_conf.release_all_cams()
+
+    

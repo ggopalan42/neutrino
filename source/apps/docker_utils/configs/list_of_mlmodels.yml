@@ -1,0 +1,4 @@
+ml_models:            # List of model configs to load
+    # Currently all model config files are located in the default location of
+    #i ..../apps/configs.
+    - mobilenet_ssd_v1.yml

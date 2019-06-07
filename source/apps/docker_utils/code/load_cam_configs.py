@@ -21,6 +21,7 @@ from neutrino.source.utils import file_utils
 # Constants
 CONFIG_DIR = '../configs/'
 LIST_OF_CAMS = 'list_of_cams.yml'
+DEFAULT_CAM_STREAM_NAME = 'cam_stream_default'
 
 # Other variables
 
@@ -111,6 +112,31 @@ class single_cam_config():
         self.cam_url = '{}://{}:{}@{}/{}'.format(self.cam_proto, self.cam_user,
                                   self.cam_pw, self.cam_hostname, self.cam_uri)
 
+    # Public methods
+    def get_cam_stream_name(self):
+        ''' Return the cam stream name '''
+        # Make this a little error resilient and log an error if stream_name
+        # is not specified
+        cam_stream_name = getattr(self, 'stream_name', DEFAULT_CAM_STREAM_NAME)
+        # Not too sure how to do this automagically (i.e. not use if or try)
+        if cam_stream_name == DEFAULT_CAM_STREAM_NAME:
+            logging.warning(f'Stream name not defined for cam {self.cam_name} '
+                            'Using default stream name')
+        return cam_stream_name
+
+
+    def get_display_predictions(self):
+        ''' Return the display_predictions flag set in the config file '''
+        # If the flag cannot be found in the config, return False
+        return getattr(self, 'display_predictions', False)
+
+
+    def get_display_image(self):
+        ''' Return the display_image flag set in the config file '''
+        # If the flag cannot be found in the config, return False
+        return getattr(self, 'display_image', False)
+
+        
     def set_videowriter(self):
         ''' Set video write handler '''
         if self.write_to_file:
@@ -146,10 +172,9 @@ class single_cam_config():
             # but a few params (like video height & width) are needed for video
             # writer. So it needs to be done only after connecting
             self.set_videowriter()
-            # And also set the background subtractor object
-            # self.bgsub = cv2.createBackgroundSubtractorMOG2(detectShadows = True)
         else:
-            logging.info(f'Not connecting to {self.cam_name}. Valid flag not set')
+            logging.info(f'Not connecting to {self.cam_name}. '
+                         'Valid flag not set')
 
 
     def release_cam(self):
@@ -198,6 +223,11 @@ class cam_groups():
                 self.cam_config[cam_name] = scc
 
     # Public methods
+    def get_cam_obj(self, cam_name):
+        ''' Return the object associated with the cam name '''
+        return self.cam_config[cam_name]
+
+
     def connect_to_group_cams(self):
         ''' Connect to all cameras in this group '''
         for cam_name in self.cam_names:
@@ -247,6 +277,19 @@ class all_cams_config():
             self.cam_grp_config[cam_group_name] = cam_group_obj
 
     # Public methods
+    def get_cam_grp_config_obj(self, cam_grp_name):
+        ''' Return the cam group config associated with cam_grp_name '''
+        return self.cam_grp_config[cam_grp_name]
+
+
+    def get_cam_grp_stream_name(self, cam_grp_name):
+        ''' Return the cam group stream name ssociated with cam_grp_name '''
+        # This may sound dumb, but currently cam group stream name and
+        # cam group name are the same. But this is implemented as a 
+        # method since there may need to change this in future
+        return cam_grp_name
+
+
     def connect_to_all_cams(self):
         ''' Connect to all of the cameras that are set as valid '''
         for cam_grp_name in self.cam_grp_names:

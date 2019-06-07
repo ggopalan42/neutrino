@@ -12,3 +12,5 @@ help:
 build:
 	DOCKER_BUILDKIT=1 docker build --ssh default=${HOME}/.ssh/git_repo  \
                                        -t $(REPO_NAME)/cam2pub:$(VERSION) .
+run:
+	docker run $(REPO_NAME)/cam2pub:$(VERSION)

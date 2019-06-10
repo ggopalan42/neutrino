@@ -13,7 +13,7 @@ services:
     networks:
       - network_cam2pub_1
     volumes:
-        - /home/ggopalan/data/videos:/opt/videos/
+        - /opt/videos:/opt/videos/
     deploy:
       restart_policy:
         condition: on-failure

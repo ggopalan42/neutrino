@@ -1,5 +1,5 @@
 help:
-	cat cams_to_pubsubs.makefile
+	cat Makefile
 run:
 	docker-compose up -d
 

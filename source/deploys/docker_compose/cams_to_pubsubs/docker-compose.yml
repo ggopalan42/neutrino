@@ -9,25 +9,15 @@ services:
     image: local/cam2pub:0.1
     container_name: cam2pub_1
     environment:
-        - STREAM_NAME=cam2pub_1
+        - NEUTRINO_VALID_CAMS=slr01_bldg_d_f1_elevators
     networks:
       - network_cam2pub_1
-    deploy:
-      restart_policy:
-        condition: on-failure
-
-  cam2pub_2:
-    image: local/cam2pub:0.1
-    container_name: cam2pub_2
-    environment:
-        - STREAM_NAME=cam2pub_2
-    networks:
-      - network_cam2pub_2
+    volumes:
+        - /home/ggopalan/data/videos:/opt/videos/
     deploy:
       restart_policy:
         condition: on-failure
 
 networks:
   network_cam2pub_1:
-  network_cam2pub_2:
 

@@ -9,7 +9,7 @@ services:
     image: local/cam2pub:0.1
     container_name: cam2pub_1
     environment:
-        - NEUTRINO_VALID_CAMS=slr01_bldg_d_f1_elevators
+        - NEUTRINO_VALID_CAMS=Aruba_SLR01_Cams:slr01_bldg_d_f1_elevators
     networks:
       - network_cam2pub_1
     volumes:

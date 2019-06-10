@@ -7,7 +7,7 @@ services:
 
   cam2pub_1:
     image: local/cam2pub:0.1
-    container_name: cam2pub_1
+    container_name: cam2pub_slr01_bldg_d_f1_elevators
     environment:
         - NEUTRINO_VALID_CAMS=Aruba_SLR01_Cams:slr01_bldg_d_f1_elevators
     networks:
@@ -18,6 +18,20 @@ services:
       restart_policy:
         condition: on-failure
 
+  cam2pub_2:
+    image: local/cam2pub:0.1
+    container_name: slr01_bldg_d_f1_rear_lobby_entrance
+    environment:
+        - NEUTRINO_VALID_CAMS=Aruba_SLR01_Cams:slr01_bldg_d_f1_rear_lobby_entrance
+    networks:
+      - network_cam2pub_2
+    volumes:
+        - /opt/videos:/opt/videos/
+    deploy:
+      restart_policy:
+        condition: on-failure
+
 networks:
   network_cam2pub_1:
+  network_cam2pub_2:
 

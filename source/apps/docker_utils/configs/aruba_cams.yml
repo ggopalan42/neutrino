@@ -63,7 +63,7 @@ cams:
         cam_hostname: 192.168.128.17
         cam_uri: axis-cgi/mjpg/video.cgi
         cam_creds: aruba_axis1
-        # read_from_file: slr01_bldg_d_f1_rear_lobby_entrance_lt1.mjpg
+        read_from_file: /opt/videos/aruba_cams/slr01_bldg_d_f1_rear_lobby_entrance_save1.mjpg
         # write_to_file: vid2.mjpg
         display_image: False
         display_predictions: False

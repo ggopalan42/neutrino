@@ -25,7 +25,7 @@ LIST_OF_MLMODELS = 'list_of_mlmodels.yml'
 # Other variables
 
 # Set logging level
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 class mobilenetssd_v1():
     ''' MoblenetSSD V1 model parameters '''

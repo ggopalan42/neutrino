@@ -26,9 +26,7 @@ DEFAULT_CAM_STREAM_NAME = 'cam_stream_default'
 # Other variables
 
 # Set logging level
-logging.basicConfig(level=logging.INFO)
-# Set kafka module level higher. It spews a lot of junk
-logging.getLogger('kafka').setLevel(logging.WARNING)
+# logging.basicConfig(level=logging.INFO)
 
 class single_cam_config():
     ''' Object that holds the config and methods of one camera '''

@@ -20,7 +20,7 @@ import load_cam_configs
 import load_mlmodel_configs
 
 # Set logging level
-logging.basicConfig(level=logging.INFO)
+# Not set in the function: set_logging.logging.basicConfig(level=logging.INFO)
 
 # Constants
 
@@ -82,7 +82,7 @@ def cam2pub(cam_conf, mlmodels_conf, ml_model_name=ML_MODEL_TO_USE):
                                      message_format_version)
                         message_str = json.dumps(message_dict)
                         # Simply print it for now
-                        print('Object(s) detected in image: {}'
+                        logging.info('Object(s) detected in image: {}'
                                                    .format(message_str))
                     else:
                         logging.info('No object IDed in image')
@@ -103,11 +103,30 @@ def main_loop(cam_conf, mlmodels_conf):
         cam_conf.release_all_cams()
         return ['Keyboard Interrupt. Exiting']
 
+def set_logging():
+    ''' Setup logging so it works on both containers and locally
+
+        The basic idea is to log to the specified file if os environment
+        variable is set or to stdout if its not set
+    '''
+
+    if 'LOG_TO_FILE' in os.environ.keys():
+        log_fn = os.environ['LOG_TO_FILE']
+        # Now setup the logging.
+        print(f'Logging everything to {log_fn}')
+        logging.basicConfig(level=logging.INFO, filename=log_fn,
+                            format='%(asctime)s - %(name)s - '
+                            '%(levelname)s - %(message)s')
+
+
+
 if __name__ == '__main__':
     APP_NAME = 'camfeeds1'
     SEND_TO_KAFKA = False
 
     # Initialize
+    # Set logging
+    set_logging()
     # Connect to all cams
     # cam_config_dict = load_cam_configs.load_all_cams_config()
     cam_config_dict = load_cam_configs.docker_load_all_cams_config()

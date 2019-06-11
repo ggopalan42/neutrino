@@ -19,4 +19,4 @@ RUN pip install pip pyyaml
 ENV PYTHONPATH="/opt"
 
 WORKDIR /opt/neutrino/source/apps/docker_utils/code
-ENTRYPOINT ['python', 'cam2pub.py']
+ENTRYPOINT ["python", "cam2pub.py"]

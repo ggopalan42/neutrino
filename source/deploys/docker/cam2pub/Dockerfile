@@ -18,8 +18,5 @@ RUN pip install pip pyyaml
 # Set env variables
 ENV PYTHONPATH="/opt"
 
-# ENTRYPOINT ["/bin/echo", "Hello World!"]
-
-# ENTRYPOINT ["python", "hello.py"]
-# ENTRYPOINT ["ls"]
-ENTRYPOINT ["python", "-m", "http.server"]
+WORKDIR /opt/neutrino/source/apps/docker_utils/code
+ENTRYPOINT ['python', 'cam2pub.py']

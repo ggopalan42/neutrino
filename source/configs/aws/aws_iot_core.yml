@@ -1,0 +1,28 @@
+# ''' Contains configs for all AWS IoT Core related init and run '''
+aws_iot_core_init:
+    thing_types:
+        - cam_type:
+              properties:
+                  thingTypeDescription: "Camera Type for project Neutrino"
+                  searchableAttributes: 
+                      - camera
+                      - cam
+              tags:
+                  - "Key: type, Value: camera"
+    things:
+        dim1: dim2
+
+#   properties = {
+#                  'thingTypeDescription': 'Camera Type for project Neutrino',
+#                  'searchableAttributes': [
+#                    'camera', 'cam',
+#                   ]
+#                }
+
+
+#   tags=[
+#          {
+#            'Key': 'type', 'Value': 'camera'
+#          },
+#      ]
+

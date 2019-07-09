@@ -24,3 +24,9 @@ This is where all deploy scripts reside. These scripts are used to setup various
 
 ## local_docker_deploys:
      - This contains a number of docker compose yaml files that run several docker containers locally (that is local server) that is part of the neutrino application
+
+## AWS IoT Core:
+    - This code to deploy to AWS IoT Core is under: ./cloud/aws/aws_iot_core
+    - The code "init_iot_core.py" under this dir needs to be run to setup
+      AWS IoT Core for neutrino
+

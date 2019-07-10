@@ -58,13 +58,44 @@ def init_thing_types(thing_type_list):
             resp = aws_thing_type.create_thing_type(thing_type_name, 
                                       properties=properties, tags=tags)
             status_bool,status_code = iot_core_utils.check_response_status(resp)
-            print(status_bool)
             if status_bool:
                 logging.info(f'Successfully created thing type '
                              f'"{thing_type_name}"')
             else:
                 logging.info(f'Failed to create thing type "{thing_type_name}" '
                              f'API call returned: {resp}')
+
+def init_things(things_list):
+    ''' Initialize things in AWS IoT Core
+
+        Arguments:
+            - things_list: A dictionary whose keys are the names of things 
+                           to create and values are the parameters for the thing
+    '''
+    # First get the list of things already created in AWS IoT Core
+    aws_things = iot_core_utils.aws_iot_all_things()
+    existing_things, _ = aws_things.list_all_things()
+
+    # Iterate over thing_list
+    for thing_name, thing_params in things_list.items():
+        # Check if the thing_name has already been created
+        if thing_name in existing_things:
+            # Log this fact and continue
+            logging.info(f'AWS IoT Thing "{thing_name}" already '
+                         'exists. Continuing . . . ')
+            continue
+        else:
+            # Create this thing. LoL
+            thing_type_name = thing_params['thing_type_name']
+            resp = aws_things.create_thing(thing_name, thing_type_name)
+            status_bool,status_code = iot_core_utils.check_response_status(resp)
+            if status_bool:
+                logging.info(f'Successfully created thing "{thing_name}"')
+            else:
+                logging.info(f'Failed to create thing "{thing_name}" '
+                             f'API call returned: {resp}')
+
+
 
 
 def init_iot_core():
@@ -86,6 +117,7 @@ def init_iot_core():
     # Now initialize the Core IoT Thing Types needed
     init_thing_types(thing_type_list)
     # And then initialize the Core IoT Things
+    init_things(things_list)
 
 if __name__ == '__main__':
     init_iot_core()

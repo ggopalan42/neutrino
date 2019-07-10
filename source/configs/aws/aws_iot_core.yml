@@ -9,20 +9,27 @@ aws_iot_core_init:
                       - cam
               tags:
                   - "Key: type, Value: camera"
+    # In theory, things should be the same as valid camera names or 
+    # sensor names. But in the spirit of moving faster, doing this weird thing
     things:
-        dim1: dim2
-
-#   properties = {
-#                  'thingTypeDescription': 'Camera Type for project Neutrino',
-#                  'searchableAttributes': [
-#                    'camera', 'cam',
-#                   ]
-#                }
-
-
-#   tags=[
-#          {
-#            'Key': 'type', 'Value': 'camera'
-#          },
-#      ]
+        aruba_slr01_bldg_d_f1_elevators:
+            thing_type_name: cam_type
+        aruba_slr01_bldg_d_f1_elevators:
+            thing_type_name: cam_type
+        aruba_slr01_bldg_d_f1_rear_lobby_entrance:
+            thing_type_name: cam_type
+        aruba_slr01_bldg_d_f2_elevators:
+            thing_type_name: cam_type
+        aruba_slr01_bldg_d_f3_elevators:
+            thing_type_name: cam_type
+        aruba_slr01_bldg_d_f4_elevators:
+            thing_type_name: cam_type
+        aruba_slr01_bldg_d_f5_elevators:
+            thing_type_name: cam_type
+        aruba_slr01_bldg_d_f1_s_lobby_rnd:
+            thing_type_name: cam_type
+        aruba_slr01_bldg_d_f4_helpdesk:
+            thing_type_name: cam_type
+        aruba_slr01_bldg_d_f2_archimedes:
+            thing_type_name: cam_type
 

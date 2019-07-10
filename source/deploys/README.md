@@ -30,3 +30,6 @@ This is where all deploy scripts reside. These scripts are used to setup various
     - The code "init_iot_core.py" under this dir needs to be run to setup
       AWS IoT Core for neutrino
 
+## Initialization steps for Neutrino
+1. Run init_iot_core.py located at: neutrino/source/deploys/cloud/aws/aws_iot_core. This will init AWS IoT Core
+2. 

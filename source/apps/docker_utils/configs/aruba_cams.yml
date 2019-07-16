@@ -33,6 +33,8 @@ defaults:
 #       display_image:  -> If set, will show the image with a cv2.imshow
 #       display_predictions -> If set, will draw a box around the detected obj
 #                              and name it with prediction confidence level
+#       aws_iot_topic_name -> Name to use when sending data to AWS IoT Core
+#       aws_iot_topic_qos  -> QoS to use when sending data to AWS IoT Core
 #       key:            -> Key. For future. Maybe used as kafka part. Not sure
 
 
@@ -51,6 +53,8 @@ cams:
         # write_to_file: vid1.mjpg
         display_image: False
         display_predictions: False
+        aws_iot_topic_name: camfeeds/aruba_slr01_bldg_d_f1_elevators
+        aws_iot_topic_qos: 1
         key: 0
 
     - slr01_bldg_d_f1_rear_lobby_entrance:
@@ -67,6 +71,8 @@ cams:
         # write_to_file: vid2.mjpg
         display_image: False
         display_predictions: False
+        aws_iot_topic_name: camfeeds/aruba_slr01_bldg_d_f1_rear_lobby_entrance
+        aws_iot_topic_qos: 1
         key: 0
 
     - slr01_bldg_d_f2_elevators:
@@ -83,6 +89,8 @@ cams:
         # write_to_file: None
         display_image: False
         display_predictions: False
+        aws_iot_topic_name: camfeeds/aruba_slr01_bldg_d_f2_elevators
+        aws_iot_topic_qos: 1
         key: 0
 
     # Using this for ALE integration testing
@@ -100,6 +108,8 @@ cams:
         # write_to_file: loc_corr_f3_elevators_cam_r1.mjpg
         display_image: False
         display_predictions: False
+        aws_iot_topic_name: camfeeds/aruba_slr01_bldg_d_f3_elevators
+        aws_iot_topic_qos: 1
         key: 0
 
     - slr01_bldg_d_f4_elevators:
@@ -116,6 +126,8 @@ cams:
         # write_to_file: None
         display_image: False
         display_predictions: False
+        aws_iot_topic_name: camfeeds/aruba_slr01_bldg_d_f4_elevators
+        aws_iot_topic_qos: 1
         key: 0
 
     - slr01_bldg_d_f5_elevators:
@@ -132,6 +144,8 @@ cams:
         # write_to_file: None
         display_image: False
         display_predictions: False
+        aws_iot_topic_name: camfeeds/aruba_slr01_bldg_d_f5_elevators
+        aws_iot_topic_qos: 1
         key: 0
 
     - slr01_bldg_d_f1_s_lobby_rnd:
@@ -148,6 +162,8 @@ cams:
         # write_to_file: None
         display_image: False
         display_predictions: False
+        aws_iot_topic_name: camfeeds/aruba_slr01_bldg_d_f1_s_lobby_rnd
+        aws_iot_topic_qos: 1
         key: 0
 
     - slr01_bldg_d_f4_helpdesk:
@@ -164,6 +180,8 @@ cams:
         # write_to_file: helpdesk_f4_0828.mjpg
         display_image: False
         display_predictions: False
+        aws_iot_topic_name: camfeeds/aruba_slr01_bldg_d_f4_helpdesk
+        aws_iot_topic_qos: 1
         key: 0
 
     # Conference Rooms
@@ -181,5 +199,7 @@ cams:
         # write_to_file: archimedes_0824_1641.mjpg
         display_image: False
         display_predictions: False
+        aws_iot_topic_name: camfeeds/aruba_slr01_bldg_d_f2_archimedes
+        aws_iot_topic_qos: 1
         key: 0
 

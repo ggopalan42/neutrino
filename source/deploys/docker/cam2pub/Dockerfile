@@ -13,7 +13,7 @@ RUN --mount=type=ssh git clone git@github.com:ggopalan42/neutrino.git /opt/neutr
 RUN --mount=type=ssh git clone git@github.com:ggopalan42/pylibs.git /opt/pylibs
 
 # Install required packages
-RUN pip install pip pyyaml
+RUN pip install pip pyyaml boto3
 
 # Set env variables
 ENV PYTHONPATH="/opt"

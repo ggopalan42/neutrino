@@ -13,6 +13,7 @@ import os
 import sys
 import logging
 import json
+import boto3
 
 # Local imports
 import neutrino.source.apps.app_utils.obj_nn_utils as obj_nn
@@ -20,7 +21,8 @@ import load_cam_configs
 import load_mlmodel_configs
 
 # Set logging level
-# Not set in the function: set_logging.logging.basicConfig(level=logging.INFO)
+# Now set in the function: set_logging()
+# logging.basicConfig(level=logging.INFO)
 
 # Constants
 
@@ -28,7 +30,20 @@ import load_mlmodel_configs
 ML_MODEL_TO_USE = 'MobilenetSSD_V1'
 MESSAGE_FORMAT_VERSION = '1.0.0'
 
-def cam2pub(cam_conf, mlmodels_conf, ml_model_name=ML_MODEL_TO_USE):
+def send_aws_iot_message(client, cam_obj, message_json, log_message=True):
+    ''' Send message to AWS IoT Core '''
+    # This should be moved to a separate and common function
+    aws_iot_topic_name, aws_iot_topic_qos = cam_obj.get_aws_iot_params()
+    # Send the data
+    if log_message:
+      logging.info(f'Sending message to AWS IoT on topic: {aws_iot_topic_name}')
+      logging.info('Object(s) detected in image: {}'.format(str(message_json)))
+    client.publish(topic=aws_iot_topic_name, qos=aws_iot_topic_qos, 
+                 payload=message_json)
+    
+
+def cam2pub(cam_conf, mlmodels_conf, client_data, 
+            ml_model_name=ML_MODEL_TO_USE):
     ''' Read from image, identify objects and publish ided objects '''
     model_obj = mlmodels_conf.get_dnn_model(ml_model_name)
     message_format_version = MESSAGE_FORMAT_VERSION
@@ -44,7 +59,10 @@ def cam2pub(cam_conf, mlmodels_conf, ml_model_name=ML_MODEL_TO_USE):
             cam_obj = cam_grp_config_obj.get_cam_obj(cam_name)
             # Process camera only if valid
             if cam_obj.valid:
+                # Get info about this camera to enable messaging
                 cam_stream_name = cam_obj.get_cam_stream_name()
+                aws_iot_topic_name, aws_iot_topic_qos =     \
+                                              cam_obj.get_aws_iot_params()
 
                 # Read from cam and process for objects if valid image
                 valid_image, image = cam_obj.cap_handle.read()
@@ -81,9 +99,8 @@ def cam2pub(cam_conf, mlmodels_conf, ml_model_name=ML_MODEL_TO_USE):
                                      cam_grp_stream_name, cam_stream_name, 
                                      message_format_version)
                         message_str = json.dumps(message_dict)
-                        # Simply print it for now
-                        logging.info('Object(s) detected in image: {}'
-                                                   .format(message_str))
+                        # Send the message
+                        send_aws_iot_message(client_data, cam_obj, message_str)
                     else:
                         logging.info('No object IDed in image')
                 else:
@@ -93,11 +110,11 @@ def cam2pub(cam_conf, mlmodels_conf, ml_model_name=ML_MODEL_TO_USE):
                                   valid_image))
 
 
-def main_loop(cam_conf, mlmodels_conf):
+def main_loop(cam_conf, mlmodels_conf, client_data):
     ''' Continously detect persons and quit on keyboard interrupt '''
     try:
         while True:
-            cam2pub(cam_conf, mlmodels_conf)
+            cam2pub(cam_conf, mlmodels_conf, client_data)
     except KeyboardInterrupt:
         logging.info('Received Ctrl-C. Exiting . . . ')
         cam_conf.release_all_cams()
@@ -112,9 +129,13 @@ def set_logging():
 
     if 'LOG_TO_FILE' in os.environ.keys():
         log_fn = os.environ['LOG_TO_FILE']
-        # Now setup the logging.
-        print(f'Logging everything to {log_fn}')
+        # Now setup the logging to file
         logging.basicConfig(level=logging.INFO, filename=log_fn,
+                            format='%(asctime)s - %(name)s - '
+                            '%(levelname)s - %(message)s')
+    else:
+        # Else log to stdout
+        logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s - %(name)s - '
                             '%(levelname)s - %(message)s')
 
@@ -132,6 +153,8 @@ if __name__ == '__main__':
     cam_config_dict = load_cam_configs.docker_load_all_cams_config()
     cam_conf = load_cam_configs.all_cams_config(cam_config_dict)
     cam_conf.connect_to_all_cams()
+    # Init AWS IoT Client (eventually this should go to a common place)
+    client_data=boto3.client('iot-data')
 
     # Load and initialize all ML models
     all_mlmodel_dict = load_mlmodel_configs.load_all_mlmodel_config()
@@ -139,7 +162,7 @@ if __name__ == '__main__':
     mlmodels_conf.load_all_dnn_models()
 
     # Do the main loop
-    main_loop(cam_conf, mlmodels_conf)
+    main_loop(cam_conf, mlmodels_conf, client_data)
 
     # cleanup when done
     cam_conf.release_all_cams()

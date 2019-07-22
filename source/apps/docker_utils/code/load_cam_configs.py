@@ -134,6 +134,14 @@ class single_cam_config():
         # If the flag cannot be found in the config, return False
         return getattr(self, 'display_image', False)
 
+    def get_aws_iot_params(self):
+        ''' Return the parameters needed to communicate to AWS IoT Core '''
+        # If the flag cannot be found in the config, return a default
+        aws_iot_topic_name =  getattr(self, 'aws_iot_topic_name',
+                                      'camfeeds/default')
+        aws_iot_topic_qos =  getattr(self, 'aws_iot_topic_qos', 0)
+        return aws_iot_topic_name, aws_iot_topic_qos
+
         
     def set_videowriter(self):
         ''' Set video write handler '''

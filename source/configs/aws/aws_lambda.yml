@@ -1,0 +1,14 @@
+# This file contains configs for AWS Lambda function
+# This config lists all of the lambda functions that need to be
+# created in AWS.
+
+create_lambda_functions:
+    - init_lambda:
+        function_name_in_aws: initlambda   # Note: Do not add .py
+        run_time: python3.7
+        function_handler: lambda_handler
+        # Currently below role was created manually
+        # Need to add functionality to create programatically
+        function_role_name: neutrino_lambda_basic
+        local_function: source/deploys/cloud/aws/aws_lambda/aws_lambda_to_be_copied/aws_lambda_test1.py
+        local_function_env: not_used_currently

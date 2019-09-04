@@ -105,6 +105,7 @@ def cam2pub(cam_conf, mlmodels_conf, client_data,
                         logging.info('No object IDed in image')
                 else:
                     # If image read failed, log error
+                    print(cam_obj.read_from_file)
                     logging.error('Image read from camera {} failed. '
                                   '(error ret = {}'.format(cam_name, 
                                   valid_image))

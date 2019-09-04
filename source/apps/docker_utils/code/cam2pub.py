@@ -104,11 +104,22 @@ def cam2pub(cam_conf, mlmodels_conf, client_data,
                     else:
                         logging.info('No object IDed in image')
                 else:
-                    # If image read failed, log error
-                    print(cam_obj.read_from_file)
-                    logging.error('Image read from camera {} failed. '
-                                  '(error ret = {}'.format(cam_name, 
-                                  valid_image))
+                    # Now if you have reached here, it could be because
+                    # EoF was reached when reading from a file. So check this
+                    # And yes, this is a bit of a hack
+                    if cam_obj.read_from_file:
+                        # If its reading from a file, reset it so it continously
+                        # sends. This is mostly for debug
+                        cam_obj.cap_handle = cv2.VideoCapture(cam_obj.
+                                                              read_from_file)
+                        logging.debug('EoF reached when reading from file. '
+                                      'Resetting')
+                    else:
+                        # This could be a genuine error
+                        # If image read failed, log error
+                        logging.error('Image read from camera {} failed. '
+                                      '(error ret = {}'.format(cam_name, 
+                                      valid_image))
 
 
 def main_loop(cam_conf, mlmodels_conf, client_data):

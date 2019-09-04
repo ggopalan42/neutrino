@@ -16,7 +16,7 @@ from pylibs.cloud.aws.iam import iam_utils
 from pylibs.cloud.aws.aws_lambda import lambda_utils
 
 # Set logging level
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 # Constants
 LAMBDA_CONFIG_FN = 'source/configs/aws/aws_lambda.yml'
@@ -66,10 +66,14 @@ def create_functions():
         local_func_wo_ext = os.path.splitext(local_func_basename)[0]
         local_func_zip_fn = os.path.join(tempdir_name, 
                                          f'{local_func_wo_ext}.zip')
+        # For testing: overwrite local_func_zip_fn
         local_func_zip_fn = '/tmp/zip_test1/init_test.zip'
         with zipfile.ZipFile(local_func_zip_fn, 'w') as ziph:
-            ziph.write(local_func_full_fn) 
-        # Now this may sound supremely dumb, but I know of no other way,
+            # Control the name of the archive (using the base name of the func)
+            # Otherwise the archive name is something like: 
+            #      /home/<user>/../func_name.py whcih AWS rejects
+            ziph.write(local_func_full_fn, arcname=local_func_basename) 
+        # Now this may sound supremely dumb (to zip and then immediately unzip),        # but I know of no other way,
         # so please pardon
         with open(local_func_zip_fn, 'rb') as fh:
             zipped_code = fh.read()

@@ -15,7 +15,7 @@ This is where all deploy scripts reside. These scripts are used to setup various
     - These images are then brought up and run via configurations in the docker_compose dir (in other words, this is the dir that contains the orchestration parts)
 
     - Specific documentation for cam2pub:
-        - For cam2bup to run, this is the sequence:
+        - For cam2pub to run, this is the sequence:
             1. First build all base images (That is run docker_make_base_images.sh)
             2. Then cd into cam2pub and run "make build". This step is needed whenever anything is pushed into github. These builds are run with caching off so they pull from github everytime. Not sure how to do it more efficiently
             3. Then use the corresponding docker_compose to get the application up and running

@@ -15,9 +15,6 @@ from pylibs.cloud.aws.iot_core import iot_core_utils
 # Constants
 IOT_CORE_CONFIG_FILE = 'source/configs/aws/aws_iot_core.yml'
 
-# Set logging level
-logging.basicConfig(level=logging.INFO)
-
 
 def init_thing_types(thing_type_list):
     ''' Initialize AWS IoT Core Thing Types 
@@ -122,6 +119,9 @@ def init_iot_core(config_file=IOT_CORE_CONFIG_FILE):
     init_things(things_list)
 
 if __name__ == '__main__':
+    # Set logging level
+    logging.basicConfig(level=logging.INFO)
+
     init_iot_core()
 
 

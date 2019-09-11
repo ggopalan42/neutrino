@@ -15,9 +15,6 @@ from neutrino.source.utils import file_utils
 from pylibs.cloud.aws.iam import iam_utils
 from pylibs.cloud.aws.aws_lambda import lambda_utils
 
-# Set logging level
-logging.basicConfig(level=logging.INFO)
-
 # Constants
 LAMBDA_CONFIG_FN = 'source/configs/aws/aws_lambda.yml'
 
@@ -119,6 +116,9 @@ def init_aws_lambda():
     '''
 
 if __name__ == '__main__':
+    # Set logging level
+    logging.basicConfig(level=logging.INFO)
+
     init_aws_lambda()
 
 

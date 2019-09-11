@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 LAMBDA_CONFIG_FN = 'source/configs/aws/aws_lambda.yml'
 
 
-def create_functions():
+def create_functions(config_fn):
     ''' This will create all of the functions specified in aws_lambda.yml
     '''
 
@@ -37,7 +37,7 @@ def create_functions():
     tempdir_name = tempdir_handler.name
 
     # Load the lambda config
-    ffn = os.path.join(neutrino_home, LAMBDA_CONFIG_FN)
+    ffn = os.path.join(neutrino_home, config_fn)
     lambda_cfg_dict = file_utils.yaml2dict(ffn)
 
     # Get a list of functions already on AWS
@@ -103,7 +103,7 @@ def init_aws_lambda():
         Arugments: None
         Return: None
     '''
-    create_functions()
+    create_functions(LAMBDA_CONFIG_FN)
     '''
     # Determine the local aws lambda path
     config_ffn = os.path.join(neutrino_home, 

@@ -9,6 +9,11 @@
 
 # Setup IAM
 # Setup Roles and Policies (for now, roles only. Ploicies are manual)
+iam_deploy:
+    filepath: relative    # Relative to NEUTRINO_HOME that is
+    filedir: configs/aws
+    filenames:            # Can provide a list of config files here
+        - aws_iam.yml
 
 # Setup DynamoDB
 

@@ -1,0 +1,17 @@
+# This is the config file used to delete the entire neutrino application
+#
+# The takedown follows sequence specified in this file. So if order of takedown
+# are important, please specify them in the correct order
+
+# Shutdown local docker containers
+
+
+# Delete AWS IoT
+
+
+# Delete lambdas
+
+
+# Delete DynamoDB
+
+

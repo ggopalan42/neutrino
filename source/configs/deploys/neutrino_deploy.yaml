@@ -1,0 +1,20 @@
+# This is the config file used for first deploy of neutrino
+#
+# This config file deploys the entire neutrino application
+# For now, docker images are deployed only to the local server
+# and AWS services are deployes as well
+#
+# The deploy follows sequence specified in this file. So if order of deploys
+# are important, please specify them in order
+
+# Setup IAM
+# Setup Roles and Policies (for now, roles only. Ploicies are manual)
+
+# Setup DynamoDB
+
+
+# Setup AWS IoT
+# Setup things, thing types, etc.
+
+# Setup Lambdas
+

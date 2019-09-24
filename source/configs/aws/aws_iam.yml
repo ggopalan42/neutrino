@@ -1,0 +1,9 @@
+# Config file for initializing AWS IAM
+# init_path 
+
+init_path: neutrino.source.deploys.cloud.aws.aws_iam.init_iam
+init_filename: init_iam.py 
+init_funcname: init_iam
+
+rule_name1:
+    role_name2: 22

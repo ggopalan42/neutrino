@@ -8,17 +8,18 @@
 # are important, please specify them in order
 
 # Setup IAM
-# Setup Roles and Policies (for now, roles only. Ploicies are manual)
-iam_deploy:
-    filepath: relative    # Relative to NEUTRINO_HOME that is
-    filedir: configs/aws
+# Setup Roles and Policies (for now, roles only. Policies are manual)
+aws_iam:
+    pathtype: relative    # Relative to NEUTRINO_HOME that is
+    filedir: source/deploys/cloud/aws/aws_iam
     filenames:            # Can provide a list of config files here
-        - aws_iam.yml
+        # list of sub deploy init files: cmd line args if any
+        - init_iam.py: deploy  # aws_iam.py takes deploy or teardown as o
 
 # Setup DynamoDB
 
-
 # Setup AWS IoT
+
 # Setup things, thing types, etc.
 
 # Setup Lambdas

@@ -12,37 +12,21 @@ from pylibs.io.logging_utils import set_logging
 DEPLOY_PATH = 'source/configs/deploys'     # Relative to NEUTRINO_HOME
 DEPLOY_FN = 'neutrino_deploy.yaml'
 
-def deploy_sub(sub_name, sub_cfg_dict):
+def deploy_sub(sub_name, sub_list):
     ''' Deploy a sub component of neutrino deploy
 
         Arguments:
-            - sub_cfg_dict: Config dict for deploying sub component
+            - sub_name: The name of the sub-component to deploy
+            - sub_list: List of sub-component deploys and their cmd line params
     '''
-    # Setup to call the sub-component initialization file
-    # pathtype = sub_cfg_dict['init_pathtype']
-    # init_importpath = sub_cfg_dict['init_importpath']
-    # init_funcname = sub_cfg_dict['init_funcname']
-
-    '''
-    # Get to the init file
-    if pathtype == 'relative':
-        if 'NEUTRINO_HOME' not in os.environ:
-            # Do nothing
-            logging.error('Env variable "NEUTRINO_HOME" not set. '
-                          f'Not doing anything for sub deploy type {sub_name}')
-            return False
-        filedir = sub_cfg_dict['init_filedir']
-        base_path = os.environ['NEUTRINO_HOME']
-        init_file_ffn = os.path.join(base_path, filedir, init_filename)
-    elif pathtype == 'absolute':
-        init_file_ffn = init_filename
-    else:
-        logging.error(f'Unknown path type: {pathtype}. Skipping deploy '
-                      f'of {sub_name}')
-        return False
-    '''
-
-    print(sub_name, sub_cfg_dict)
+    print(sub_name, sub_list)
+    for sub_ffn_params in sub_list:
+        # Form the command
+        sub_file = list(sub_ffn_params.keys())[0]
+        sub_args = list(sub_ffn_params.values())[0]
+        sub_cmd = 'python {} {}'.format(sub_file, sub_args)
+        logging.info(f'Running init for {sub_name} with args {sub_args}')
+        os.system(sub_cmd)
 
 
 def deploy_main(deploy_ffn):

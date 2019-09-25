@@ -13,8 +13,8 @@ aws_iam:
     pathtype: relative    # Relative to NEUTRINO_HOME that is
     filedir: source/deploys/cloud/aws/aws_iam
     filenames:            # Can provide a list of config files here
-        # list of sub deploy init files: cmd line args if any
-        - init_iam.py: deploy  # aws_iam.py takes deploy or teardown as o
+        # list of sub deploy init files: args
+        - init_iam.py: deploy    # aws_iam.py takes deploy or teardown as args
 
 # Setup DynamoDB
 

@@ -9,6 +9,7 @@ import os
 import logging
 import time
 
+from pylibs.io.logging_utils import set_logging
 from neutrino.source.utils import file_utils
 from pylibs.cloud.aws.dynamodb import dynamodb_utils
 
@@ -17,27 +18,6 @@ DYNAMODB_CONFIG_FN = 'source/configs/aws/aws_dynamodb.yml'
 DYNDB_CREATE_TABLE_TIMEOUT = 60    # Seconds. At some point, this 
                                    # should move to a central config location
 
-'''
-    # For testing
-    table_name = 'gg_test1'
-    primary_key = 'gg_test1_pri'
-    secondary_key = 'gg_test1_sec'
-    gg_test1_table_schema = [
-        {
-            'AttributeName': 'gg_test1_pri',
-            'AttributeType': 'S'      # S = String
-        },
-        {
-            'AttributeName': 'gg_test1_sec',
-            'AttributeType': 'N'      # N = Number
-        },
-    ]
-
-def create_table(table_name, table_schema, primary_key, secondary_key=None,
-                 billing_mode='PAY_PER_REQUEST', other_attributes={},
-                 aws_region=aws_settings.AWS_DEFAULT_REGION):
-
-'''
 def get_table_args(table_name, table_dict):
     ''' Format table_dict into a dict format so DynamoDB create_table function
         can be called
@@ -101,7 +81,10 @@ def create_single_table(table_name, table_args_dict):
             - table_name: name of table to create
             - table_args_dict: List of arguments formated properly to create
                                a table 
-        Returns: Nothing
+        Returns:
+            - tuple of (status, message)
+                - Status: True if success, False if fails
+                - Message: Error message if status is false
     '''
 
     # Try and create the table
@@ -132,7 +115,8 @@ def create_single_table(table_name, table_args_dict):
         return False, err_msg
     
     # if we are here, all is well
-    return True, True
+    return True, 'OK'
+
 
 def create_dyndb_tables(config_fn):
     ''' Create all needed DynamoDB tables
@@ -140,15 +124,15 @@ def create_dyndb_tables(config_fn):
         Arguments:
             - config_fn: path to the config file relative to NEUTRINO_HOME
 
-        Returns: Nothing
+        Returns:
+            - tuple of (status, message)
+                - Status: True if success, False if fails
+                - Message: Error message if status is false
     '''
+    # Load the config YAML
+    dyndb_cfg_dict = file_utils.yaml2dict(config_fn)
 
-    # Setup some paths
-    neutrino_home = os.environ['NEUTRINO_HOME']
-
-    # Load the lambda config
-    ffn = os.path.join(neutrino_home, config_fn)
-    dyndb_cfg_dict = file_utils.yaml2dict(ffn)
+    rstat, rval = True, 'OK'
 
     # Get list of exisitng tables so we do not attempt te re-create tables
     existing_tables = dynamodb_utils.list_tables()
@@ -163,97 +147,60 @@ def create_dyndb_tables(config_fn):
         else:
             logging.info(f'Creating table {table_name} . . .')
             table_args_dict = get_table_args(table_name, table_dict)
-            resp = create_single_table(table_name, table_args_dict)
+            rstat, rval = create_single_table(table_name, table_args_dict)
+            if not rstat:
+                rstat = False
+                rval = ('Something went wrong in table creation. '
+                       'Check log messages ')
+
+    return rstat, rval
 
 
-
-########################### Delete below here #######################
-def create_functions():
-    ''' This will create all of the functions specified in aws_lambda.yml
-    '''
-
-    # Open a client for lambda functions
-    lambda_client = boto3.client('lambda')
-
-    # Setup some paths
-    neutrino_home = os.environ['NEUTRINO_HOME']
-
-    # Create a temp directory. This is to hold the lambda zip files
-    tempdir_handler = tempfile.TemporaryDirectory()
-    tempdir_name = tempdir_handler.name
-
-    # Load the lambda config
-    ffn = os.path.join(neutrino_home, LAMBDA_CONFIG_FN)
-    lambda_cfg_dict = file_utils.yaml2dict(ffn)
-
-    # Get a list of functions already on AWS
-    existing_functions, _ = lambda_utils.list_functions()
-
-    # Now go over the functions specified in lambda config yaml and create it
-    # if it has not been already
-    for fspec in lambda_cfg_dict['create_lambda_functions']:
-        # unfurl the function specifications
-        func_name = list(fspec.keys())[0]
-        logging.info(f'Creating function {func_name}')
-        func_params = fspec[func_name]
-
-        aws_func_name = func_params['function_name_in_aws']
-        aws_func_run_time = func_params['run_time']
-        aws_func_handler = func_params['function_handler']
-        aws_func_role_name = func_params['function_role_name']
-        local_func_fn = func_params['local_function']
-        local_func_env = func_params['local_function_env']
-
-        # get the local function
-        local_func_full_fn = os.path.join(neutrino_home, local_func_fn)
-        # Extract the basename (without the ext) and make a zip file in
-        # the tempdir
-        local_func_basename = os.path.basename(local_func_full_fn)
-        local_func_wo_ext = os.path.splitext(local_func_basename)[0]
-        local_func_zip_fn = os.path.join(tempdir_name, 
-                                         f'{local_func_wo_ext}.zip')
-        # For testing: overwrite local_func_zip_fn
-        local_func_zip_fn = '/tmp/zip_test1/init_test.zip'
-        with zipfile.ZipFile(local_func_zip_fn, 'w') as ziph:
-            # Control the name of the archive (using the base name of the func)
-            # Otherwise the archive name is something like: 
-            #      /home/<user>/../func_name.py whcih AWS rejects
-            ziph.write(local_func_full_fn, arcname=local_func_basename) 
-        # Now this may sound supremely dumb (to zip and then immediately unzip),        # but I know of no other way,
-        # so please pardon
-        with open(local_func_zip_fn, 'rb') as fh:
-            zipped_code = fh.read()
-
-        # Get the Arn for the role
-        role_arn, _ = iam_utils.get_role_arn(aws_func_role_name)
-
-        # Phew! Now finally create the lambda function
-        logging.info(f'Creating lambda function {func_name}')
-        lambda_client.create_function(
-                   FunctionName = aws_func_name,
-                   Runtime = aws_func_run_time,
-                   Role = role_arn,
-                   Handler = f'{local_func_wo_ext}.{aws_func_handler}',
-                   Code = dict(ZipFile = zipped_code),
-                   Timeout = 300,   # make this configurable
-               )
-
-
-    # Close stuff
-    tempdir_handler.cleanup()
-
-def init_dynamodb():
+def init_dynamodb(cfg_ffn):
     ''' This will initialize all of the databases needed for neutrino
 
         Arugments: None
         Return: None
     '''
-    create_dyndb_tables(DYNAMODB_CONFIG_FN)
+    # I know there is only one function call here. But maybe more in future 
+    rstat, rval = create_dyndb_tables(cfg_ffn)
+    return rstat, rval
+
 
 if __name__ == '__main__':
+
     # Set logging level
     logging.basicConfig(level=logging.INFO)
 
-    init_dynamodb()
+    # get full name of deploy config file
+    neutrino_home = os.environ['NEUTRINO_HOME']
+    cfg_ffn = os.path.join(neutrino_home, DYNAMODB_CONFIG_FN)
+
+    # init DynamoDB
+    rstat, rval = init_dynamodb(cfg_ffn)
+
+    if not rstat:
+        logging.warning(f'Some table creation failed with message: {rval}')
 
 
+'''
+    # For testing
+    table_name = 'gg_test1'
+    primary_key = 'gg_test1_pri'
+    secondary_key = 'gg_test1_sec'
+    gg_test1_table_schema = [
+        {
+            'AttributeName': 'gg_test1_pri',
+            'AttributeType': 'S'      # S = String
+        },
+        {
+            'AttributeName': 'gg_test1_sec',
+            'AttributeType': 'N'      # N = Number
+        },
+    ]
+
+def create_table(table_name, table_schema, primary_key, secondary_key=None,
+                 billing_mode='PAY_PER_REQUEST', other_attributes={},
+                 aws_region=aws_settings.AWS_DEFAULT_REGION):
+
+'''

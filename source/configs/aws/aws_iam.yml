@@ -1,9 +1,25 @@
 # Config file for initializing AWS IAM
 # init_path 
 
-init_path: neutrino.source.deploys.cloud.aws.aws_iam.init_iam
-init_filename: init_iam.py 
-init_funcname: init_iam
+create_roles:
+    - role_name: gg_test2_role
+      trust_policy: aws_policy_allow_lambda
+      path: '/' 
+      description: "Hello, Hello. Mike testing"
+      tags:
+          # tags are of form: Key: Value
+        - Project: GG Test Project1
 
-rule_name1:
-    role_name2: 22
+
+
+# Trust policies are defined below. The "create_roles" config above
+# use the trust policies defined below, linked by policy_name
+trust_policies:
+    aws_policy_allow_lambda:
+        Version:  "2012-10-17"
+        Statement:
+            - Effect: Allow
+              Principal:
+                  Service: lambda.amazonaws.com
+              Action: "sts:AssumeRole"
+

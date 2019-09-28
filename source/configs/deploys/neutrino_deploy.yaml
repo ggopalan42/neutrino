@@ -7,16 +7,32 @@
 # The deploy follows sequence specified in this file. So if order of deploys
 # are important, please specify them in order
 
+# Example setup
+# name:
+#    # relative is relative to NEUTRINO_HOME, local is relatibe to 'pwd':
+#    pathtype: relative | local | absolute
+#    # either relative or absolute path to init filenames
+#    filedir: abc/def/...
+#    filenames:
+#        - init_fn1.py: arg1 arg2 . . . 
+#        - init_fn2.py: arg1 arg2 . . . 
+
 # Setup IAM
 # Setup Roles and Policies (for now, roles only. Policies are manual)
 aws_iam:
-    pathtype: relative    # Relative to NEUTRINO_HOME that is
+    pathtype: relative
     filedir: source/deploys/cloud/aws/aws_iam
-    filenames:            # Can provide a list of config files here
-        # list of sub deploy init files: args
-        - init_iam.py: deploy    # aws_iam.py takes deploy or teardown as args
+    filenames:
+        - init_iam.py: none
 
 # Setup DynamoDB
+aws_dynamodb:
+    pathtype: relative
+    filedir: source/deploys/cloud/aws/aws_dynamodb
+    filenames:
+        - init_dynabodb.py: none
+
+
 
 # Setup AWS IoT
 

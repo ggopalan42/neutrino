@@ -106,6 +106,7 @@ def create_single_table(table_name, table_args_dict):
         logging.info(f'Waiting for table to go active . . '
                      f'(waited {t} of {DYNDB_CREATE_TABLE_TIMEOUT} secs)')
         if resp['TableStatus'] == 'ACTIVE':
+            logging.info(f'Table {table_name} is active')
             break
 
     if t >= DYNDB_CREATE_TABLE_TIMEOUT:
@@ -181,6 +182,8 @@ if __name__ == '__main__':
 
     if not rstat:
         logging.warning(f'Some table creation failed with message: {rval}')
+    else:
+        logging.info('Done creating all DynamoDB tables')
 
 
 '''

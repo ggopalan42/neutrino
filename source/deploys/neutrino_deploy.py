@@ -19,7 +19,6 @@ def deploy_sub(sub_name, sub_list):
             - sub_name: The name of the sub-component to deploy
             - sub_list: List of sub-component deploys and their cmd line params
     '''
-    print(sub_name, sub_list)
     for sub_ffn_params in sub_list:
         # Form the command
         sub_file = list(sub_ffn_params.keys())[0]
@@ -42,10 +41,13 @@ def deploy_main(deploy_ffn):
 
     # Now start running through the various setups
     logging.info('Starting neutrino deploy . . . ')
-    for (dep_name, dep_files) in deploy_cfg.items():
+    for (dep_name, dep_params) in deploy_cfg.items():
+        if not dep_params['valid']:
+            logging.info(f'Skipping deploy for {dep_name}, valid flag not set')
+            continue
         logging.info(f'Deploying for: {dep_name}')
-        pathtype = dep_files['pathtype']
-        files_list = dep_files['filenames']
+        pathtype = dep_params['pathtype']
+        files_list = dep_params['filenames']
 
         if pathtype == 'relative':
             if 'NEUTRINO_HOME' not in os.environ:
@@ -53,7 +55,7 @@ def deploy_main(deploy_ffn):
                 logging.error('Env variable "NEUTRINO_HOME" not set. '
                               f'Not doing anything for deploy type {dep_name}')
                 continue
-            filedir = dep_files['filedir']
+            filedir = dep_params['filedir']
             base_path = os.environ['NEUTRINO_HOME']
             rel_path = os.path.join(base_path, filedir)
             # Coulda done this with list comp + dict comp, but woulda lost
@@ -69,7 +71,7 @@ def deploy_main(deploy_ffn):
                 file_ffn = {os.path.join(cwd, k):v for (k,v) in d.items()}
                 files_ffn_list.append(file_ffn)
         elif pathtype == 'absolute':
-            abs_path = dep_files['filedir']
+            abs_path = dep_params['filedir']
             files_ffn_list = []
             for d in files_list:
                 file_ffn = {os.path.join(abs_path, k):v for (k,v) in d.items()}

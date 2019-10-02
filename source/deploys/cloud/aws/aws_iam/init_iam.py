@@ -172,8 +172,7 @@ def init_aws_iam(cfg_file):
 
 if __name__ == '__main__':
 
-    # Set logging level
-    logging.basicConfig(level=logging.INFO)
+    set_logging()
 
     # get full name of deploy config file
     neutrino_home = os.environ['NEUTRINO_HOME']

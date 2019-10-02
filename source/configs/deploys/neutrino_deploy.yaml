@@ -20,6 +20,7 @@
 # Setup IAM
 # Setup Roles and Policies (for now, roles only. Policies are manual)
 aws_iam:
+    valid: False
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_iam
     filenames:
@@ -27,10 +28,11 @@ aws_iam:
 
 # Setup DynamoDB
 aws_dynamodb:
+    valid: True
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_dynamodb
     filenames:
-        - init_dynabodb.py: none
+        - init_dynamodb.py: none
 
 
 

@@ -20,7 +20,7 @@
 # Setup IAM
 # Setup Roles and Policies (for now, roles only. Policies are manual)
 aws_iam:
-    valid: False
+    valid: False    # tested
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_iam
     filenames:
@@ -28,17 +28,27 @@ aws_iam:
 
 # Setup DynamoDB
 aws_dynamodb:
-    valid: True
+    valid: False # tested
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_dynamodb
     filenames:
         - init_dynamodb.py: none
 
-
-
 # Setup AWS IoT
-
-# Setup things, thing types, etc.
+#    - Sets up things, thing types, etc.
+aws_iot_core:
+    valid: False # tested
+    pathtype: relative
+    filedir: source/deploys/cloud/aws/aws_iot_core
+    filenames:
+        - init_iot_core.py: none
 
 # Setup Lambdas
+aws_lambda:
+    valid: False # tested
+    pathtype: relative
+    filedir: source/deploys/cloud/aws/aws_lambda
+    filenames:
+        - init_lambda.py: none
+
 

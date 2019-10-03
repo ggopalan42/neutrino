@@ -6,11 +6,13 @@
 '''
 
 import os
+import sys
 import logging
 import tempfile
 import zipfile
 import boto3
 
+from pylibs.io.logging_utils import set_logging
 from neutrino.source.utils import file_utils
 from pylibs.cloud.aws.iam import iam_utils
 from pylibs.cloud.aws.aws_lambda import lambda_utils
@@ -19,23 +21,19 @@ from pylibs.cloud.aws.aws_lambda import lambda_utils
 LAMBDA_CONFIG_FN = 'source/configs/aws/aws_lambda.yml'
 
 
-def create_functions(config_fn):
+def create_functions(cfg_ffn):
     ''' This will create all of the functions specified in aws_lambda.yml
     '''
 
     # Open a client for lambda functions
     lambda_client = boto3.client('lambda')
 
-    # Setup some paths
-    neutrino_home = os.environ['NEUTRINO_HOME']
-
     # Create a temp directory. This is to hold the lambda zip files
     tempdir_handler = tempfile.TemporaryDirectory()
     tempdir_name = tempdir_handler.name
 
     # Load the lambda config
-    ffn = os.path.join(neutrino_home, config_fn)
-    lambda_cfg_dict = file_utils.yaml2dict(ffn)
+    lambda_cfg_dict = file_utils.yaml2dict(cfg_ffn)
 
     # Get a list of functions already on AWS
     existing_functions, _ = lambda_utils.list_functions()
@@ -45,10 +43,17 @@ def create_functions(config_fn):
     for fspec in lambda_cfg_dict['create_lambda_functions']:
         # unfurl the function specifications
         func_name = list(fspec.keys())[0]
-        logging.info(f'Creating function {func_name}')
-        func_params = fspec[func_name]
+        aws_func_name = fspec[func_name]['function_name_in_aws']
 
-        aws_func_name = func_params['function_name_in_aws']
+        # If function already exists, do nothing
+        if aws_func_name in existing_functions:
+            logging.info(f'Function {func_name} already exists '
+                            'Doing nothing and moving on')
+            continue
+
+        logging.info(f'Creating function {func_name}')
+
+        func_params = fspec[func_name]
         aws_func_run_time = func_params['run_time']
         aws_func_handler = func_params['function_handler']
         aws_func_role_name = func_params['function_role_name']
@@ -93,32 +98,25 @@ def create_functions(config_fn):
     # Close stuff
     tempdir_handler.cleanup()
 
-def init_aws_lambda():
+def init_aws_lambda(cfg_ffn):
     ''' This will do all of the necessary AWS Lambda initialition needed for
         running neutrino apps 
 
         Arugments: None
         Return: None
     '''
-    create_functions(LAMBDA_CONFIG_FN)
-    '''
-    # Determine the local aws lambda path
-    config_ffn = os.path.join(neutrino_home, 
-                              'source/configs/aws/aws_iot_core.yml')
-    iot_core_cfg_dict = file_utils.yaml2dict(config_ffn)
-    thing_type_list = iot_core_cfg_dict['aws_iot_core_init']['thing_types']
-    things_list = iot_core_cfg_dict['aws_iot_core_init']['things']
-
-    # Now initialize the Core IoT Thing Types needed
-    init_thing_types(thing_type_list)
-    # And then initialize the Core IoT Things
-    init_things(things_list)
-    '''
+    # I know there is only one function call here. But maybe more in future 
+    create_functions(cfg_ffn)
 
 if __name__ == '__main__':
-    # Set logging level
-    logging.basicConfig(level=logging.INFO)
 
-    init_aws_lambda()
+    set_logging()
+
+    # get full name of deploy config file
+    neutrino_home = os.environ['NEUTRINO_HOME']
+    cfg_ffn = os.path.join(neutrino_home, LAMBDA_CONFIG_FN)
+
+    # Init lambda
+    init_aws_lambda(cfg_ffn)
 
 

@@ -170,8 +170,7 @@ def init_dynamodb(cfg_ffn):
 
 if __name__ == '__main__':
 
-    # Set logging level
-    logging.basicConfig(level=logging.INFO)
+    set_logging()
 
     # get full name of deploy config file
     neutrino_home = os.environ['NEUTRINO_HOME']

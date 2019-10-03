@@ -9,6 +9,7 @@
 import os
 import logging
 
+from pylibs.io.logging_utils import set_logging
 from neutrino.source.utils import file_utils
 from pylibs.cloud.aws.iot_core import iot_core_utils
 
@@ -98,17 +99,15 @@ def init_things(things_list):
 
 
 
-def init_iot_core(config_file=IOT_CORE_CONFIG_FILE):
+def init_iot_core(config_ffn):
     ''' This will do all of the necessary AWS IoT Core initialition needed for
         running neutrino apps 
 
-        Arugments: Optional config file (YAML)
+        Arugments: Config file (YAML)
         Return: None
     '''
 
     # Determine the config file path
-    neutrino_home = os.environ['NEUTRINO_HOME']
-    config_ffn = os.path.join(neutrino_home, IOT_CORE_CONFIG_FILE) 
     iot_core_cfg_dict = file_utils.yaml2dict(config_ffn)
     thing_type_list = iot_core_cfg_dict['aws_iot_core_init']['thing_types']
     things_list = iot_core_cfg_dict['aws_iot_core_init']['things']
@@ -119,9 +118,12 @@ def init_iot_core(config_file=IOT_CORE_CONFIG_FILE):
     init_things(things_list)
 
 if __name__ == '__main__':
-    # Set logging level
-    logging.basicConfig(level=logging.INFO)
+    set_logging()
 
-    init_iot_core()
+    # get full name of deploy config file
+    neutrino_home = os.environ['NEUTRINO_HOME']
+    cfg_ffn = os.path.join(neutrino_home, IOT_CORE_CONFIG_FILE)
+
+    init_iot_core(cfg_ffn)
 
 

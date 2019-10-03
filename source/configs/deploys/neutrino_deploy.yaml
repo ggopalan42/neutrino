@@ -50,5 +50,3 @@ aws_lambda:
     filedir: source/deploys/cloud/aws/aws_lambda
     filenames:
         - init_lambda.py: none
-
-

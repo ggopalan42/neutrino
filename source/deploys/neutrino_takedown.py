@@ -49,7 +49,7 @@ def takedown_main(cfg_ffn):
             logging.info(f'Skipping takedown for {down_name}, '
                           'valid flag not set')
             continue
-        logging.info(f'Deploying for: {down_name}')
+        logging.info(f'Taking down: {down_name}')
         pathtype = down_params['pathtype']
         files_list = down_params['filenames']
 

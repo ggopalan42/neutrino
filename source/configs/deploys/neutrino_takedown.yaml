@@ -1,17 +1,51 @@
-# This is the config file used to delete the entire neutrino application
+# This is the config file used for taking down the neutrino app
 #
-# The takedown follows sequence specified in this file. So if order of takedown
-# are important, please specify them in the correct order
+# The takedown follows sequence specified in this file. So if order of deploys
+# are important, please specify them in order
 
-# Shutdown local docker containers
+# Example
+# name:
+#    # relative is relative to NEUTRINO_HOME, local is relatibe to 'pwd':
+#    pathtype: relative | local | absolute
+#    # either relative or absolute path to init filenames
+#    filedir: abc/def/...
+#    filenames:
+#        - init_fn1.py: arg1 arg2 . . . 
+#        - init_fn2.py: arg1 arg2 . . . 
 
+# Takedown IAM
+# Takedown Roles and Policies (for now, roles only. Policies are manual)
+aws_iam:
+    valid: True    # tested
+    pathtype: relative
+    filedir: source/deploys/cloud/aws/aws_iam
+    filenames:
+        # Yeah, I know this is called init. For now they are the same.
+        # If they continue to be the same, the files can be renamed during
+        # a re-structure
+        - init_iam.py: none
 
-# Delete AWS IoT
+# Takedown DynamoDB
+aws_dynamodb:
+    valid: False # tested
+    pathtype: relative
+    filedir: source/deploys/cloud/aws/aws_dynamodb
+    filenames:
+        - init_dynamodb.py: none
 
+# Takedown AWS IoT
+#    - Sets up things, thing types, etc.
+aws_iot_core:
+    valid: False # tested
+    pathtype: relative
+    filedir: source/deploys/cloud/aws/aws_iot_core
+    filenames:
+        - init_iot_core.py: none
 
-# Delete lambdas
-
-
-# Delete DynamoDB
-
-
+# Takedown Lambdas
+aws_lambda:
+    valid: False # tested
+    pathtype: relative
+    filedir: source/deploys/cloud/aws/aws_lambda
+    filenames:
+        - init_lambda.py: none

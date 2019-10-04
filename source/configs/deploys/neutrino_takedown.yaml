@@ -16,22 +16,19 @@
 # Takedown IAM
 # Takedown Roles and Policies (for now, roles only. Policies are manual)
 aws_iam:
-    valid: True    # tested
+    valid: False    # tested
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_iam
     filenames:
-        # Yeah, I know this is called init. For now they are the same.
-        # If they continue to be the same, the files can be renamed during
-        # a re-structure
-        - init_iam.py: none
+        - down_iam.py: none
 
 # Takedown DynamoDB
 aws_dynamodb:
-    valid: False # tested
+    valid: True # tested
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_dynamodb
     filenames:
-        - init_dynamodb.py: none
+        - down_dynamodb.py: none
 
 # Takedown AWS IoT
 #    - Sets up things, thing types, etc.
@@ -40,7 +37,7 @@ aws_iot_core:
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_iot_core
     filenames:
-        - init_iot_core.py: none
+        - down_iot_core.py: none
 
 # Takedown Lambdas
 aws_lambda:
@@ -48,4 +45,4 @@ aws_lambda:
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_lambda
     filenames:
-        - init_lambda.py: none
+        - down_lambda.py: none

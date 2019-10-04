@@ -33,7 +33,7 @@ aws_dynamodb:
 # Takedown AWS IoT
 #    - Sets up things, thing types, etc.
 aws_iot_core:
-    valid: True # tested
+    valid: False # tested
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_iot_core
     filenames:

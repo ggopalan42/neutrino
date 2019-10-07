@@ -2,13 +2,15 @@
 # init_path 
 
 create_roles:
-    - role_name: gg_test2_role
+    - role_name: neutrino_alpha1
       trust_policy: aws_policy_allow_lambda
       path: '/' 
-      description: "Hello, Hello. Mike testing"
+      description: "neutrino policy to allow: lambda access"
       tags:
           # tags are of form: Key: Value
-        - Project: GG Test Project1
+        - project: Neutrino
+        - project_ver: alpha_v1
+        - access: all_lambda
 
 
 
@@ -22,4 +24,3 @@ trust_policies:
               Principal:
                   Service: lambda.amazonaws.com
               Action: "sts:AssumeRole"
-

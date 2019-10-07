@@ -25,14 +25,25 @@
 
 
 create_dynamodb_tables:
-    - test_db1:
-          primary_key: test1_pri 
-          secondary_key: test1_sec
-          table_schema:
-               - test1_pri: S
-               - test1_sec: N
+    - na1_cam_v1p1:    # Full expansion: 
+                       #      na1: neutrino alpha v1
+                       #      cam_v1p1:  Camera stream table. Version 1.1
+          primary_key: detect_time
+          secondary_key: obj_index
+          table_schema:               # This is table schema version: SV2
+               - detect_time: N       # Primary key
+               - obj_index: N         # Secondary key
+               - detect_time_hr: S
+               - confidence: N
+               - found: S
+               - stream_group_name: S
+               - stream_name: S
+               - msg_format_version: S
+               - startX: N
+               - endX: N
+               - startY: N
+               - endY: N
           billing_mode: PAY_PER_REQUEST
           billing_mode_params:
               read_capacity_units: 20
               write_capacity_units: 20
-

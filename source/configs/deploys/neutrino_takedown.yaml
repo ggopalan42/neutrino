@@ -16,7 +16,7 @@
 # Takedown IAM
 # Takedown Roles and Policies (for now, roles only. Policies are manual)
 aws_iam:
-    valid: False    # tested
+    valid: False         # Tested
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_iam
     filenames:
@@ -24,7 +24,7 @@ aws_iam:
 
 # Takedown DynamoDB
 aws_dynamodb:
-    valid: False # tested
+    valid: False         # Tested
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_dynamodb
     filenames:
@@ -33,7 +33,7 @@ aws_dynamodb:
 # Takedown AWS IoT
 #    - Sets up things, thing types, etc.
 aws_iot_core:
-    valid: False # tested
+    valid: False        # Not implemented as of 10/7
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_iot_core
     filenames:
@@ -41,7 +41,7 @@ aws_iot_core:
 
 # Takedown Lambdas
 aws_lambda:
-    valid: False # tested
+    valid: False        # Not implemented as of 10/7
     pathtype: relative
     filedir: source/deploys/cloud/aws/aws_lambda
     filenames:

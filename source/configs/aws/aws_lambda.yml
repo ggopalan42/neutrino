@@ -3,12 +3,12 @@
 # created in AWS.
 
 create_lambda_functions:
-    - init_lambda:
-        function_name_in_aws: initlambda   # Note: Do not add .py
+    - na1_iot2dyn_test1:     # na1 = Neutrino Alpha v1
+        function_name_in_aws: na1_iot2dyn_test1   # Note: Do not add .py
         run_time: python3.7
-        function_handler: lambda_handler
+        function_handler: iot2dyn_handler
         # Currently below role was created manually
         # Need to add functionality to create programatically
         function_role_name: neutrino_lambda_basic
-        local_function: source/deploys/cloud/aws/aws_lambda/aws_lambda_to_be_copied/aws_lambda_test1.py
+        local_function: source/deploys/cloud/aws/aws_lambda/aws_lambda_to_be_copied/iot2dyn.py
         local_function_env: not_used_currently

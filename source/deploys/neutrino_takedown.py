@@ -26,7 +26,7 @@ def down_sub(sub_name, sub_list):
         sub_file = list(sub_ffn_params.keys())[0]
         sub_args = list(sub_ffn_params.values())[0]
         sub_cmd = 'python {} {}'.format(sub_file, sub_args)
-        logging.info(f'Running init for {sub_name} with args {sub_args}')
+        logging.info(f'Running takedown for {sub_name} with args {sub_args}')
         os.system(sub_cmd)
 
 

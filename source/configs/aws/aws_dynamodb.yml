@@ -5,8 +5,8 @@
 # General structure of a db config
 #
 #    - table_name:                     # Name of the Table
-#          primary_key: test1_pri      # Primary (or hash) key name
-#          secondary_key: test1_sec    # Secondary (or sort) key name
+#          primary_key: detect_time100 # Primary (or hash) key name
+#          secondary_key: obj_index    # Secondary (or sort) key name
 #          table_schema:               # Schema of the table. This should be
 #                                      # a list of AttributeName:AttributeType
 #                                      # pairs. At minimul schema of pri and sec
@@ -28,13 +28,13 @@ create_dynamodb_tables:
     - na1_cam_v1p1:    # Full expansion: 
                        #      na1: neutrino alpha v1
                        #      cam_v1p1:  Camera stream table. Version 1.1
-          primary_key: detect_time
+          primary_key: detect_time100
           secondary_key: obj_index
           table_schema:               # This is table schema version: SV2
-               - detect_time: N       # Primary key
+               - detect_time100: N    # Primary key
                - obj_index: N         # Secondary key
                - detect_time_hr: S
-               - confidence: N
+               - confidence: S
                - found: S
                - stream_group_name: S
                - stream_name: S

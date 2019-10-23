@@ -35,6 +35,11 @@ wheels/
 pip-log.txt
 pip-delete-this-directory.txt
 
+# Terraform
+.terraform
+*.tfstate
+*.tfstate.backup
+
 # Unit test / coverage reports
 htmlcov/
 .tox/

@@ -1,0 +1,4 @@
+# This streamlit config file will be copied to the container at
+# /root/.streamlit/config.toml
+[server]
+headless = true

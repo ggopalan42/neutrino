@@ -1,6 +1,6 @@
 #! /bin/bash
 
-This is fake (pseudo) code for initializing neutrino app.
+These are the steps for initilizing neutrino
 This is supposed to be run once per deploy
 
 1. Run docker/docker_make_base_images.sh

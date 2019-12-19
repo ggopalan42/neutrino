@@ -30,17 +30,28 @@ import load_mlmodel_configs
 ML_MODEL_TO_USE = 'MobilenetSSD_V1'
 MESSAGE_FORMAT_VERSION = '1.0.0'
 
+# At the moment, this call to AWS seems to be crashing. Right now
+# getting by it by adding a try and a pass. But this needs to be 
+# made more robust
 def send_aws_iot_message(client, cam_obj, message_json, log_message=True):
     ''' Send message to AWS IoT Core '''
     # This should be moved to a separate and common function
     aws_iot_topic_name, aws_iot_topic_qos = cam_obj.get_aws_iot_params()
     # Send the data
-    if log_message:
-      logging.info(f'Sending message to AWS IoT on topic: {aws_iot_topic_name}')
-      logging.info('Object(s) detected in image: {}'.format(str(message_json)))
-    client.publish(topic=aws_iot_topic_name, qos=aws_iot_topic_qos, 
-                 payload=message_json)
-    
+    try:
+        client.publish(topic=aws_iot_topic_name, qos=aws_iot_topic_qos, 
+                       payload=message_json)
+        if log_message:
+          logging.info(f'Sending message to AWS IoT on topic: '
+                       f'{aws_iot_topic_name}')
+          logging.info(f'Object(s) detected in image: {str(message_json)}')
+    except Exception as e:
+        # Log it and continue for now
+        logging.error(f'Attempting to send message to '
+                      f'topic {aws_iot_topic_name} with content '
+                      f'{str(message_json) failed. Continuting for now. '
+                      f'Raise alarms in later release '
+                      f'Exception error is {e}')
 
 def cam2pub(cam_conf, mlmodels_conf, client_data, 
             ml_model_name=ML_MODEL_TO_USE):

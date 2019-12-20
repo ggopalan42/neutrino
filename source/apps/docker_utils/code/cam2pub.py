@@ -47,10 +47,10 @@ def send_aws_iot_message(client, cam_obj, message_json, log_message=True):
           logging.info(f'Object(s) detected in image: {str(message_json)}')
     except Exception as e:
         # Log it and continue for now
-        logging.error(f'Attempting to send message to '
+        logging.error('Attempting to send message to '
                       f'topic {aws_iot_topic_name} with content '
                       f'{str(message_json) failed. Continuting for now. '
-                      f'Raise alarms in later release '
+                      'Raise alarms in later release '
                       f'Exception error is {e}')
 
 def cam2pub(cam_conf, mlmodels_conf, client_data, 
